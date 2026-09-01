@@ -1,9 +1,9 @@
 import React from 'react';
 import { LavaLogo } from './LavaLogo';
-import { MapPin, MessageCircle, ArrowUp } from 'lucide-react';
+import { MapPin, MessageCircle, ArrowUp, ShieldCheck } from 'lucide-react';
 
 interface FooterProps {
-  onNavigateTab: (tab: 'home' | 'catalog' | 'club' | 'guides') => void;
+  onNavigateTab: (tab: 'home' | 'catalog' | 'club' | 'guides' | 'crm') => void;
   onOpenQuiz: () => void;
 }
 
@@ -45,7 +45,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
           {/* Col 2: Navigation */}
           <div className="space-y-3">
             <span className="text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold block">
-              Explorar
+              Navegación
             </span>
             <ul className="space-y-2.5 text-xs text-[#8c8276]">
               <li>
@@ -80,6 +80,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
                   Guías de Barista
                 </button>
               </li>
+              <li>
+                <button
+                  onClick={() => onNavigateTab('crm')}
+                  className="hover:text-[#d49a55] transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#d49a55]" />
+                  <span>CRM & Gestión Admin</span>
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -92,7 +101,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
               ¿Dudas con la molienda para tu cafetera o suscripción? Escribinos directamente por WhatsApp.
             </p>
             <a
-              href="https://wa.me/5491132136050?text=Hola%20LAVA!%20Quisiera%20asesoramiento%20para%20elegir%20mi%20caf%C3%A9"
+              href="https://wa.me/5491131476953?text=Hola%20LAVA!%20Quisiera%20asesoramiento%20para%20elegir%20mi%20caf%C3%A9"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white text-xs font-semibold transition-all"
@@ -124,4 +133,3 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
     </footer>
   );
 };
-

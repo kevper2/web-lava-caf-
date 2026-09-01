@@ -215,7 +215,8 @@ export const DEMO_CLIENTS: LoyaltyProfile[] = [
   },
 ];
 
-export const INITIAL_LOYALTY_PROFILE: LoyaltyProfile = DEMO_CLIENTS[0];
+export const INITIAL_LOYALTY_PROFILE: LoyaltyProfile | null = null;
+export const INITIAL_CLIENTS: LoyaltyProfile[] = DEMO_CLIENTS;
 
 export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
   {

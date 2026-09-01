@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { LavaLogo } from './LavaLogo';
 import { RollingBanner } from './RollingBanner';
 import { CartItem, LoyaltyProfile } from '../types';
-import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, ShieldCheck } from 'lucide-react';
 
 interface HeaderProps {
-  activeTab: 'home' | 'catalog' | 'club' | 'guides';
-  setActiveTab: (tab: 'home' | 'catalog' | 'club' | 'guides') => void;
+  activeTab: 'home' | 'catalog' | 'club' | 'guides' | 'crm';
+  setActiveTab: (tab: 'home' | 'catalog' | 'club' | 'guides' | 'crm') => void;
   cartItems: CartItem[];
   setIsCartOpen: (open: boolean) => void;
   setIsQuizOpen: (open: boolean) => void;
-  loyaltyProfile: LoyaltyProfile;
+  loyaltyProfile: LoyaltyProfile | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,11 +34,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const navLinks: { id: 'home' | 'catalog' | 'club' | 'guides'; label: string }[] = [
+  const navLinks: { id: 'home' | 'catalog' | 'club' | 'guides' | 'crm'; label: string }[] = [
     { id: 'home', label: 'Colección' },
     { id: 'catalog', label: 'Los 3 Estilos' },
     { id: 'club', label: 'CLUB MAGMA' },
     { id: 'guides', label: 'Guías Barista' },
+    { id: 'crm', label: 'CRM' },
   ];
 
   return (
@@ -58,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex items-center justify-between">
           
-          {/* Brand Logo - pure horizontal logo with generous breathing room */}
+          {/* Brand Logo */}
           <button
             onClick={() => setActiveTab('home')}
             className="cursor-pointer transition-opacity hover:opacity-90 flex items-center py-1"
@@ -67,40 +68,49 @@ export const Header: React.FC<HeaderProps> = ({
             <LavaLogo size="md" />
           </button>
 
-          {/* Desktop Navigation - Compressed, refined typography */}
-          <nav className="hidden md:flex items-center gap-7 lg:gap-10">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => setActiveTab(link.id)}
-                className={`text-[10px] uppercase tracking-[0.25em] font-normal transition-colors cursor-pointer py-1 ${
+                className={`text-[10px] uppercase tracking-[0.25em] font-normal transition-colors cursor-pointer py-1 flex items-center gap-1.5 ${
                   activeTab === link.id
                     ? 'text-[#f5eedf] border-b border-[#d49a55]'
+                    : link.id === 'crm'
+                    ? 'text-[#a38b72] hover:text-[#f5eedf]'
                     : 'text-[#7d746a] hover:text-[#f5eedf]'
                 }`}
               >
-                {link.label}
+                {link.id === 'crm' && <ShieldCheck className="w-3 h-3 text-[#d49a55]" />}
+                <span>{link.label}</span>
               </button>
             ))}
           </nav>
 
           {/* Right actions: Member Portal & Cart Trigger */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
             
             {/* Club Privé / Member Portal Trigger */}
             <button
               onClick={() => setActiveTab('club')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all cursor-pointer text-[11px] ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all cursor-pointer text-[11px] ${
                 activeTab === 'club'
                   ? 'bg-white/10 border-[#d49a55] text-white'
                   : 'bg-white/[0.02] border-white/10 text-[#8e8477] hover:text-white hover:border-white/20'
               }`}
             >
               <User className="w-3 h-3 text-[#d49a55]" />
-              <span className="hidden sm:inline font-normal">{loyaltyProfile.customerName.split(' ')[0]}</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[8.5px] bg-white/5 font-medium text-[#d49a55]">
-                {loyaltyProfile.tier}
-              </span>
+              {loyaltyProfile ? (
+                <>
+                  <span className="hidden sm:inline font-normal">{loyaltyProfile.customerName.split(' ')[0]}</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[8.5px] bg-[#d49a55]/20 font-bold text-[#d49a55]">
+                    {loyaltyProfile.points} pts
+                  </span>
+                </>
+              ) : (
+                <span className="font-medium text-xs">CLUB MAGMA</span>
+              )}
             </button>
 
             {/* Cart Trigger */}
@@ -141,11 +151,16 @@ export const Header: React.FC<HeaderProps> = ({
                   setActiveTab(link.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`block w-full text-left text-xs uppercase tracking-widest font-semibold py-2 ${
+                className={`block w-full text-left text-xs uppercase tracking-widest font-semibold py-2 flex items-center justify-between ${
                   activeTab === link.id ? 'text-[#d49a55]' : 'text-[#8e857c]'
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.id === 'crm' && (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-[#d49a55] font-mono">
+                    ADMIN
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -159,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-full py-2.5 px-4 rounded-xl bg-[#d49a55] text-black text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
             >
               <User className="w-4 h-4" />
-              <span>CLUB MAGMA ({loyaltyProfile.customerName.split(' ')[0]})</span>
+              <span>{loyaltyProfile ? `Mi Cuenta (${loyaltyProfile.customerName.split(' ')[0]})` : 'Ingresar al Club Magma'}</span>
             </button>
           </div>
         </div>
@@ -167,5 +182,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-
-

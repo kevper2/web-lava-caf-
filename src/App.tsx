@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { CoffeeBean, CartItem, Order, Subscription, LoyaltyProfile, GrindType, BagSize } from './types';
-import { COFFEE_BEANS, INITIAL_ORDERS, INITIAL_SUBSCRIPTIONS, INITIAL_LOYALTY_PROFILE } from './data/coffeeData';
+import { COFFEE_BEANS, INITIAL_ORDERS, INITIAL_SUBSCRIPTIONS, INITIAL_CLIENTS } from './data/coffeeData';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { CoffeeStickersShowcase } from './components/CoffeeStickersShowcase';
 import { BrandStory } from './components/BrandStory';
 import { LoyaltyClub } from './components/LoyaltyClub';
+import { CrmDashboard } from './components/CrmDashboard';
 import { BrewingGuides } from './components/BrewingGuides';
 import { BeanCustomizerModal } from './components/BeanCustomizerModal';
 import { WhatsAppCheckoutModal } from './components/WhatsAppCheckoutModal';
@@ -14,27 +15,27 @@ import { CartDrawer } from './components/CartDrawer';
 import { Footer } from './components/Footer';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'club' | 'guides'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'club' | 'guides' | 'crm'>('home');
 
   // Automatic scroll to top whenever tab/link changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 'initial-1',
-      beanId: 'andes-colombianos',
-      beanName: 'Andes Colombianos',
-      grind: 'Granos',
-      size: '500g',
-      unitPrice: 26000,
-      quantity: 1,
-      frequency: 'one_time',
-    },
-  ]);
+
+  // Initial cart starts clean/empty
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  
+  // Orders registry in CRM
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  
+  // Subscriptions state
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(INITIAL_SUBSCRIPTIONS);
-  const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltyProfile>(INITIAL_LOYALTY_PROFILE);
+  
+  // Complete clients list in CRM
+  const [clients, setClients] = useState<LoyaltyProfile[]>(INITIAL_CLIENTS);
+  
+  // Starts logged out (null) as requested
+  const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltyProfile | null>(null);
 
   // Modals state
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -95,25 +96,50 @@ export function App() {
     setCartItems([]);
     setDirectCheckoutItem(null);
 
-    // Update loyalty profile & tasting history
-    setLoyaltyProfile((prev) => {
-      const newTastings = newOrder.items.map((item) => ({
-        date: newOrder.date,
-        beanId: item.beanId,
-        beanName: item.beanName,
-        grind: item.grind,
-        size: item.size,
-        orderId: newOrder.id,
-      }));
+    // If customer was logged in or if customer already exists in CRM
+    const cleanPhone = newOrder.phone.replace(/\D/g, '');
+    let matchedClient = clients.find((c) => c.phone.replace(/\D/g, '').includes(cleanPhone));
 
-      return {
-        ...prev,
-        points: prev.points + newOrder.earnedPoints,
-        lifetimePoints: prev.lifetimePoints + newOrder.earnedPoints,
-        ordersCount: prev.ordersCount + 1,
-        tastingLog: [...newTastings, ...prev.tastingLog],
+    const newTastings = newOrder.items.map((item) => ({
+      date: newOrder.date,
+      beanId: item.beanId,
+      beanName: item.beanName,
+      grind: item.grind,
+      size: item.size,
+      orderId: newOrder.id,
+    }));
+
+    if (matchedClient) {
+      const updatedClient: LoyaltyProfile = {
+        ...matchedClient,
+        points: matchedClient.points + newOrder.earnedPoints,
+        lifetimePoints: matchedClient.lifetimePoints + newOrder.earnedPoints,
+        ordersCount: matchedClient.ordersCount + 1,
+        tastingLog: [...newTastings, ...matchedClient.tastingLog],
       };
-    });
+      setClients((prev) => prev.map((c) => (c.id === matchedClient!.id ? updatedClient : c)));
+      if (loyaltyProfile && loyaltyProfile.id === matchedClient.id) {
+        setLoyaltyProfile(updatedClient);
+      }
+    } else {
+      const newClientProfile: LoyaltyProfile = {
+        id: `CLI-${Date.now().toString().slice(-4)}`,
+        customerName: newOrder.customerName,
+        phone: newOrder.phone,
+        email: newOrder.email || `${newOrder.customerName.toLowerCase().replace(/\s+/g, '')}@magma.ar`,
+        tier: 'Privé',
+        points: newOrder.earnedPoints,
+        lifetimePoints: newOrder.earnedPoints,
+        ordersCount: 1,
+        favoriteBeanId: newOrder.items[0]?.beanId || 'andes-colombianos',
+        memberSince: 'Septiembre 2026',
+        tastingLog: newTastings,
+      };
+      setClients((prev) => [newClientProfile, ...prev]);
+      if (loyaltyProfile) {
+        setLoyaltyProfile(newClientProfile);
+      }
+    }
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
@@ -124,7 +150,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-black text-[#f7eedf] font-sans antialiased selection:bg-[#d49a55]/30 selection:text-white">
       
-      {/* Top Navigation Bar (Slim & Compressed) */}
+      {/* Top Navigation Bar */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -136,10 +162,9 @@ export function App() {
 
       {/* Main Views */}
       <main>
-        {/* PÁGINA PRINCIPAL: Solo la primera sección (Hero) y la tercera (BrandStory) + Footer */}
+        {/* PÁGINA PRINCIPAL */}
         {activeTab === 'home' && (
           <>
-            {/* 1ra Sección: Hero con llamado a la acción y Test de Personalidad */}
             <HeroSection
               onExploreClick={() => {
                 setActiveTab('catalog');
@@ -147,8 +172,6 @@ export function App() {
               }}
               onQuizClick={() => setIsQuizOpen(true)}
             />
-
-            {/* 3ra Sección: La Tostaduría de Montaña (Brand Story) */}
             <BrandStory />
           </>
         )}
@@ -165,7 +188,7 @@ export function App() {
           </div>
         )}
 
-        {/* CLUB MAGMA & MEMBRESÍA: Unificado con Bitácora, Membresía y CRM con Canje de Puntos */}
+        {/* CLUB MAGMA: Versión Compacta para Socios */}
         {activeTab === 'club' && (
           <div className="pt-20 sm:pt-24 lg:pt-28">
             <LoyaltyClub
@@ -175,6 +198,22 @@ export function App() {
               subscriptions={subscriptions}
               setSubscriptions={setSubscriptions}
               onOpenCustomizer={(bean) => handleOpenCustomizer(bean)}
+              allClients={clients}
+              setAllClients={setClients}
+            />
+          </div>
+        )}
+
+        {/* CRM ADMINISTRATIVO */}
+        {activeTab === 'crm' && (
+          <div className="pt-20 sm:pt-24 lg:pt-28">
+            <CrmDashboard
+              orders={orders}
+              setOrders={setOrders}
+              clients={clients}
+              setClients={setClients}
+              currentUserProfile={loyaltyProfile}
+              onUpdateCurrentUserProfile={setLoyaltyProfile}
             />
           </div>
         )}

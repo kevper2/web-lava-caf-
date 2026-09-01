@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CartItem, Order, GrindType, BagSize } from '../types';
 import { LavaLogo } from './LavaLogo';
+import { calculateEarnedPointsFromItems } from '../data/coffeeData';
 import { 
   X, 
   MessageCircle, 
@@ -41,12 +42,11 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
 }) => {
   // Form fields
   const [name, setName] = useState('Santiago Villar');
-  const [phone, setPhone] = useState('+54 9 297 241-8890');
+  const [phone, setPhone] = useState('+54 9 11 3147-6953');
   const [email, setEmail] = useState('santiago@patagoniaprive.com');
   const [address, setAddress] = useState('Barrio Las Pendientes');
   const [city, setCity] = useState('San Martín de los Andes');
   const [province, setProvince] = useState('Neuquén');
-  const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'Transferencia Bancaria' | 'MercadoPago' | 'Tarjeta de Crédito'>('Transferencia Bancaria');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,9 +83,10 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
 ${itemsSummary}
 
 *Total a Pagar:* $${currentTotal.toLocaleString('es-AR')} ARS
-${notes ? `*Notas de Calibración:* ${notes}\n` : ''}
 ━━━━━━━━━━━━━━━━━━━━
 _Enviado desde San Martín de los Andes_`;
+
+    const earnedPoints = calculateEarnedPointsFromItems(itemsToCheckout);
 
     const newOrder: Order = {
       id: orderId,
@@ -104,7 +105,7 @@ _Enviado desde San Martín de los Andes_`;
       total: currentTotal,
       status: 'confirmado',
       trackingCode: `LAVA-SMA-${Math.floor(10000 + Math.random() * 90000)}`,
-      earnedPoints: Math.round(currentTotal / 150),
+      earnedPoints,
     };
 
     onOrderCreated(newOrder);
@@ -114,7 +115,7 @@ _Enviado desde San Martín de los Andes_`;
     } catch (err) {}
 
     // Open WhatsApp
-    const waUrl = `https://wa.me/5492972418890?text=${encodeURIComponent(whatsappMessage)}`;
+    const waUrl = `https://wa.me/5491131476953?text=${encodeURIComponent(whatsappMessage)}`;
     window.open(waUrl, '_blank');
 
     setTimeout(() => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CoffeeBean, GrindType, BagSize, Frequency, CartItem } from '../types';
 import { COFFEE_BEANS } from '../data/coffeeData';
 import { LavaLogo } from './LavaLogo';
@@ -24,11 +24,17 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
     initialBean ? initialBean.id : COFFEE_BEANS[0].id
   );
   const [selectedSize, setSelectedSize] = useState<BagSize>('500g');
-  const [selectedGrind, setSelectedGrind] = useState<GrindType>('Filtro');
+  const [selectedGrind, setSelectedGrind] = useState<GrindType>('Granos');
   const [selectedFrequency, setSelectedFrequency] = useState<Frequency>('one_time');
-  const [customNote, setCustomNote] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [showAddedCheck, setShowAddedCheck] = useState(false);
+
+  // Sync selected bean whenever initialBean or isOpen changes
+  useEffect(() => {
+    if (initialBean) {
+      setSelectedBeanId(initialBean.id);
+    }
+  }, [initialBean, isOpen]);
 
   if (!isOpen) return null;
 
@@ -62,7 +68,6 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
       unitPrice,
       quantity,
       frequency: selectedFrequency,
-      customNote: customNote.trim() || undefined,
     };
 
     onAddToCart(item);
@@ -87,7 +92,6 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
       unitPrice,
       quantity,
       frequency: selectedFrequency,
-      customNote: customNote.trim() || undefined,
     };
 
     onDirectWhatsApp(item);
@@ -112,7 +116,7 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
 
         <div className="py-4">
           <h3 className="text-xl sm:text-2xl font-bold text-[#f7eedf] tracking-tight">
-            Personalizador de Molienda & Origen
+            Personalizador de Molienda & Estilo de Café
           </h3>
           <p className="text-xs text-[#8c8276] mt-1">
             Ajustá cada variable a tu método de extracción preferido.
@@ -121,10 +125,10 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
 
         <div className="space-y-6 pt-2">
           
-          {/* Origin selector */}
+          {/* Style selector */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
-              1. Seleccionar Origen
+              1. Seleccionar Estilo de Café
             </label>
             <div className="grid grid-cols-3 gap-2.5">
               {COFFEE_BEANS.map((b) => (
@@ -193,9 +197,9 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
             </div>
           </div>
 
-          {/* Quantity & Notes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div className="space-y-1.5">
+          {/* Quantity */}
+          <div className="pt-2">
+            <div className="space-y-1.5 max-w-xs">
               <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
                 Cantidad de Bolsas
               </label>
@@ -216,19 +220,6 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
                   +
                 </button>
               </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
-                Nota Especial de Calibración
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: Calibrado para cafetera Rocket"
-                value={customNote}
-                onChange={(e) => setCustomNote(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-[#141414] border border-white/10 text-xs text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
-              />
             </div>
           </div>
 

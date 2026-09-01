@@ -98,12 +98,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     </button>
                   </div>
 
-                  {item.customNote && (
-                    <p className="text-[11px] text-[#a99c8d] italic bg-black/40 p-2 rounded-lg">
-                      "{item.customNote}"
-                    </p>
-                  )}
-
                   <div className="flex items-center justify-between pt-2 border-t border-white/5">
                     {/* Quantity controls */}
                     <div className="flex items-center bg-black border border-white/10 rounded-lg p-0.5">

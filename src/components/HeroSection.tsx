@@ -12,15 +12,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onQuizClick,
 }) => {
   return (
-    <section className="relative min-h-[92vh] flex flex-col justify-center items-center text-center px-6 sm:px-10 pt-28 pb-16 overflow-hidden bg-black">
+    <section className="relative min-h-[92vh] flex flex-col justify-center items-center text-center px-6 sm:px-10 pt-32 sm:pt-36 pb-20 overflow-hidden bg-black">
       
       {/* Subtle Lava Texture / Gradient (Deep ambient warmth without clutter) */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[900px] h-[350px] bg-radial from-[#c65d1e]/10 via-[#c65d1e]/3 to-transparent blur-3xl opacity-70" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1100px] h-[450px] bg-radial from-[#c65d1e]/14 via-[#c65d1e]/4 to-transparent blur-3xl opacity-80" />
         <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black to-transparent" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center space-y-8 sm:space-y-10">
+      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center space-y-8 sm:space-y-10 my-auto">
         
         {/* Origin Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-[11px] sm:text-xs text-[#a99c8d] uppercase tracking-[0.25em]">
@@ -28,29 +28,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <span>San Martín de los Andes · Patagonia Argentina</span>
         </div>
 
-        {/* Prominent Logo Presentation */}
-        <div className="py-2">
-          <LavaLogo size="xl" className="justify-center" />
-        </div>
-
-        {/* Main Headline - High-Ticket & Clear */}
-        <div className="space-y-4 max-w-3xl">
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#f7eedf] leading-[1.12]">
-            Café de montaña concebido para paladares que no aceptan concesiones.
-          </h1>
-          
-          <p className="text-base sm:text-lg text-[#9e9386] font-normal max-w-2xl mx-auto leading-relaxed pt-2">
-            Tres perfiles supremos de altitud tostados con precisión absoluta en la cordillera. Elegí el café que refleja tu personalidad y recibilo directo vía WhatsApp.
-          </p>
+        {/* Prominent Logo Presentation - Doubled size */}
+        <div className="py-2 sm:py-4 flex justify-center w-full max-w-3xl">
+          <LavaLogo 
+            src="/Logo%20Lava%20transparencia.png" 
+            size="4xl" 
+            className="justify-center drop-shadow-[0_15px_45px_rgba(212,154,85,0.25)]" 
+          />
         </div>
 
         {/* Primary High-Ticket Actions */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 sm:pt-4 w-full sm:w-auto">
           <button
             onClick={onExploreClick}
             className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#f7eedf] text-black font-bold text-xs uppercase tracking-[0.18em] transition-all duration-300 hover:bg-white hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] cursor-pointer"
           >
-            Explorar los 3 Orígenes
+            Explorar los 3 Estilos
           </button>
 
           <button

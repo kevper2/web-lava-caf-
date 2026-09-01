@@ -24,10 +24,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-16">
           
           {/* Col 1: Brand & Location */}
-          <div className="space-y-4 md:col-span-2">
-            <LavaLogo size="lg" />
-            <p className="text-xs text-[#8c8276] max-w-md leading-relaxed pt-2">
-              Café de montaña de élite. Granos supremos de altitud tostados con precisión y maestría en San Martín de los Andes, Patagonia Argentina.
+          <div className="space-y-5 md:col-span-2">
+            <LavaLogo size="xl" />
+            <p className="text-xs text-[#8c8276] max-w-md leading-relaxed pt-1">
+              Café de montaña de calidad superior. Granos de altitud tostados con precisión y maestría. Envíos sin cargo en San Martín de los Andes.
             </p>
 
             <div className="space-y-2 pt-2 text-xs text-[#c9bba8]">
@@ -37,7 +37,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
               </div>
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#4ade80] shrink-0" />
-                <span>WhatsApp Concierge: +54 9 297 241-8890</span>
+                <span>WhatsApp: +54 9 11 3147-6953</span>
               </div>
             </div>
           </div>
@@ -53,7 +53,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
                   onClick={() => onNavigateTab('catalog')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  Los 3 Orígenes
+                  Los 3 Estilos
                 </button>
               </li>
               <li>
@@ -83,7 +83,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
             </ul>
           </div>
 
-          {/* Col 3: Direct WhatsApp Concierge */}
+          {/* Col 3: Direct WhatsApp */}
           <div className="space-y-4">
             <span className="text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold block">
               Contacto Barista
@@ -92,7 +92,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
               ¿Dudas con la molienda para tu cafetera o suscripción? Escribinos directamente por WhatsApp.
             </p>
             <a
-              href="https://wa.me/5492972418890?text=Hola%20LAVA!%20Quisiera%20asesoramiento%20para%20elegir%20mi%20caf%C3%A9"
+              href="https://wa.me/5491132136050?text=Hola%20LAVA!%20Quisiera%20asesoramiento%20para%20elegir%20mi%20caf%C3%A9"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white text-xs font-semibold transition-all"

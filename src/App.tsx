@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CoffeeBean, CartItem, Order, Subscription, LoyaltyProfile, GrindType, BagSize } from './types';
 import { COFFEE_BEANS, INITIAL_ORDERS, INITIAL_SUBSCRIPTIONS, INITIAL_LOYALTY_PROFILE } from './data/coffeeData';
 import { Header } from './components/Header';
@@ -15,12 +15,17 @@ import { Footer } from './components/Footer';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'club' | 'guides'>('home');
+
+  // Automatic scroll to top whenever tab/link changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: 'initial-1',
       beanId: 'andes-colombianos',
       beanName: 'Andes Colombianos',
-      grind: 'Filtro',
+      grind: 'Granos',
       size: '500g',
       unitPrice: 26000,
       quantity: 1,
@@ -148,9 +153,9 @@ export function App() {
           </>
         )}
 
-        {/* CATÁLOGO: Los 3 Orígenes de Café */}
+        {/* CATÁLOGO: Los 3 Estilos de Café */}
         {activeTab === 'catalog' && (
-          <div className="pt-12 sm:pt-16">
+          <div className="pt-20 sm:pt-24 lg:pt-28">
             <CoffeeStickersShowcase
               beans={COFFEE_BEANS}
               onSelectBeanToCustomize={(bean) => handleOpenCustomizer(bean)}
@@ -160,9 +165,9 @@ export function App() {
           </div>
         )}
 
-        {/* CLUB PRIVÉ & MEMBRESÍA: Unificado con Bitácora, Membresía y CRM con Canje de Puntos */}
+        {/* CLUB MAGMA & MEMBRESÍA: Unificado con Bitácora, Membresía y CRM con Canje de Puntos */}
         {activeTab === 'club' && (
-          <div className="pt-12 sm:pt-16">
+          <div className="pt-20 sm:pt-24 lg:pt-28">
             <LoyaltyClub
               currentProfile={loyaltyProfile}
               onUpdateProfile={setLoyaltyProfile}
@@ -176,7 +181,7 @@ export function App() {
 
         {/* GUÍAS BARISTA */}
         {activeTab === 'guides' && (
-          <div className="pt-12 sm:pt-16">
+          <div className="pt-20 sm:pt-24 lg:pt-28">
             <BrewingGuides />
           </div>
         )}

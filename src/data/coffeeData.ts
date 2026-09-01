@@ -1,4 +1,4 @@
-import { CoffeeBean, Reward, Subscription, Order, LoyaltyProfile, BrewingGuide } from '../types';
+import { CoffeeBean, Reward, Subscription, Order, LoyaltyProfile, BrewingGuide, BagSize } from '../types';
 
 export const COFFEE_BEANS: CoffeeBean[] = [
   {
@@ -26,9 +26,9 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     bodyDesc: 'Fluido y elegante',
     bodyPercentage: 65,
     prices: {
-      '250g': 14500,
-      '500g': 26000,
-      '1kg': 47000,
+      '250g': 20000,
+      '500g': 38000,
+      '1kg': 73000,
     },
     image: '/src/assets/images/lava_hero_mountain_1788194433698.jpg',
     accentColor: '#d49a55',
@@ -63,9 +63,9 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     bodyDesc: 'Denso y envolvente',
     bodyPercentage: 75,
     prices: {
-      '250g': 13800,
-      '500g': 24800,
-      '1kg': 45000,
+      '250g': 19000,
+      '500g': 34000,
+      '1kg': 66000,
     },
     image: '/src/assets/images/lava_roasted_beans_1788194453416.jpg',
     accentColor: '#c6894b',
@@ -100,9 +100,9 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     bodyDesc: 'Profundo y persistente',
     bodyPercentage: 95,
     prices: {
-      '250g': 15200,
-      '500g': 27500,
-      '1kg': 49000,
+      '250g': 19000,
+      '500g': 34000,
+      '1kg': 66000,
     },
     image: '/src/assets/images/lava_brewing_ritual_1788194473817.jpg',
     accentColor: '#9e6231',
@@ -118,7 +118,7 @@ export const DEMO_CLIENTS: LoyaltyProfile[] = [
   {
     id: 'CLI-001',
     customerName: 'Santiago Villar',
-    phone: '+54 9 297 241-8890',
+    phone: '+54 9 11 3147-6953',
     email: 'santiago.villar@patagoniaprive.com',
     tier: 'Summit Elite',
     points: 840,
@@ -232,7 +232,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     pricePerCycle: 23375, // 15% VIP discount
     discountPercentage: 15,
     customerName: 'Santiago Villar',
-    phone: '+54 9 297 241-8890',
+    phone: '+54 9 11 3147-6953',
     address: 'Barrio Las Pendientes, San Martín de los Andes',
   },
 ];
@@ -242,7 +242,7 @@ export const INITIAL_ORDERS: Order[] = [
     id: 'LAV-9812',
     date: '2026-08-28',
     customerName: 'Santiago Villar',
-    phone: '+54 9 297 241-8890',
+    phone: '+54 9 11 3147-6953',
     email: 'santiago.villar@patagoniaprive.com',
     address: 'Barrio Las Pendientes',
     city: 'San Martín de los Andes',
@@ -258,7 +258,6 @@ export const INITIAL_ORDERS: Order[] = [
         unitPrice: 27500,
         quantity: 1,
         frequency: 'biweekly',
-        customNote: 'Calibración fina para máquina Rocket Giotto',
       },
     ],
     subtotal: 27500,
@@ -273,7 +272,7 @@ export const INITIAL_ORDERS: Order[] = [
     id: 'LAV-9420',
     date: '2026-08-14',
     customerName: 'Santiago Villar',
-    phone: '+54 9 297 241-8890',
+    phone: '+54 9 11 3147-6953',
     email: 'santiago.villar@patagoniaprive.com',
     address: 'Barrio Las Pendientes',
     city: 'San Martín de los Andes',
@@ -305,34 +304,57 @@ export const REWARDS_CATALOG: Reward[] = [
   {
     id: 'rew-1',
     title: 'Bolsa Reserva 250g a Elección',
-    description: 'Canje de cortesía exclusivo para miembros por cualquier origen con molienda personalizada.',
-    pointsCost: 500,
+    description: 'Canje de cortesía exclusivo para miembros por cualquier estilo de café con molienda personalizada.',
+    pointsCost: 400,
     badge: 'Beneficio Exclusivo',
-    code: 'RESERVA-250G-PRIVE',
+    code: 'RESERVA-250G-MAGMA',
     unlocked: true,
     type: 'free_product',
   },
   {
     id: 'rew-2',
     title: '20% OFF en tu Próxima Orden',
-    description: 'Aplicable a pedidos individuales o ciclos de suscripción continuos.',
-    pointsCost: 350,
+    description: 'Sólo aplicable a pedidos individuales',
+    pointsCost: 500,
     badge: 'Descuento VIP',
-    code: 'PRIVE20-SANMARTIN',
+    code: 'MAGMA20-SANMARTIN',
     unlocked: true,
     type: 'discount',
   },
   {
     id: 'rew-3',
-    title: 'Degustación Privada en Tostaduría',
-    description: 'Sesión de cata guiada privada para 2 personas en nuestro espacio en San Martín de los Andes.',
-    pointsCost: 900,
-    badge: 'Experiencia Cumbre',
-    code: 'CATA-SANMARTIN-EXP',
-    unlocked: false,
+    title: 'Kit prensa francesa y molinillo manual y envase hermético para camping',
+    description: 'Set completo de aventura patagónica para extraer café de montaña en cualquier lugar.',
+    pointsCost: 800,
+    badge: 'Kit Aventura',
+    code: 'KIT-CAMPING-MAGMA',
+    unlocked: true,
     type: 'vip_experience',
   },
 ];
+
+// Helper: 1 punto por cada 10g de café (ej: 500g = 50 puntos, 250g = 25 puntos, 1kg = 100 puntos)
+export function getGramsForBagSize(size: BagSize): number {
+  switch (size) {
+    case '250g':
+      return 250;
+    case '500g':
+      return 500;
+    case '1kg':
+      return 1000;
+    default:
+      return 500;
+  }
+}
+
+export function calculatePointsForBag(size: BagSize, quantity: number = 1): number {
+  const grams = getGramsForBagSize(size);
+  return Math.floor((grams * quantity) / 10);
+}
+
+export function calculateEarnedPointsFromItems(items: { size: BagSize; quantity: number }[]): number {
+  return items.reduce((sum, item) => sum + calculatePointsForBag(item.size, item.quantity), 0);
+}
 
 export const BREWING_GUIDES: BrewingGuide[] = [
   {

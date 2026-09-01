@@ -357,7 +357,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
             Portal Exclusivo CLUB MAGMA
           </h2>
           <p className="text-xs sm:text-sm text-[#8c8276] max-w-xl">
-            Gestioná tus catas históricas, canje de recompensas, entregas quincenales y administración concierge desde San Martín de los Andes.
+            Gestioná tus catas históricas, canje de recompensas, entregas quincenales y atención personalizada desde San Martín de los Andes.
           </p>
         </div>
 
@@ -404,6 +404,26 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
       {activeTab === 'bitacora' && (
         <div className="pt-10 space-y-14 animate-in fade-in duration-300">
           
+          {/* Points Earning Rule Banner */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-[#d49a55]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#d49a55]/10 border border-[#d49a55]/20 flex items-center justify-center text-[#d49a55] shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-[#f7eedf] block">
+                  Regla de Puntos CLUB MAGMA
+                </span>
+                <p className="text-[11px] text-[#a19688]">
+                  Los puntos se suman por la cantidad exacta de café en gramos dividido 10 (ej: comprás 500 gramos = sumás 50 puntos).
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold text-[#d49a55] px-3 py-1 rounded-lg bg-[#d49a55]/10 border border-[#d49a55]/20 self-start sm:self-auto shrink-0">
+              10g = 1 punto
+            </span>
+          </div>
+
           {/* Member Card & Quick Switch */}
           <div className="p-8 sm:p-10 rounded-3xl bg-[#090909] border border-white/10 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8 shadow-2xl">
             <div className="absolute top-0 right-0 w-96 h-96 bg-radial from-[#d49a55]/8 to-transparent blur-3xl pointer-events-none" />
@@ -556,7 +576,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
                     <button
                       onClick={() => {
                         const text = `Hola LAVA! Quiero canjear el beneficio de mi membresía: ${reward.title} (Código: ${reward.code}) para mi cuenta de ${currentProfile.customerName}.`;
-                        window.open(`https://wa.me/5492972418890?text=${encodeURIComponent(text)}`, '_blank');
+                        window.open(`https://wa.me/5491132136050?text=${encodeURIComponent(text)}`, '_blank');
                       }}
                       className="w-full py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 text-xs font-semibold text-white transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
@@ -604,7 +624,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
                 <RefreshCw className="w-10 h-10 text-[#5e554a] mx-auto" />
                 <h3 className="text-lg font-bold text-[#f7eedf]">No tenés entregas periódicas activas</h3>
                 <p className="text-xs text-[#8c8276] leading-relaxed">
-                  Recibí automáticamente tus orígenes preferidos con molienda exacta en San Martín de los Andes y envíos a todo el país.
+                  Recibí automáticamente tus estilos de café preferidos con molienda exacta en San Martín de los Andes y envíos a todo el país.
                 </p>
                 {onOpenCustomizer && (
                   <button
@@ -790,7 +810,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-[#f7eedf] tracking-tight">
-                Panel Concierge & Descuento de Puntos
+                Panel de Membresía & Descuento de Puntos
               </h3>
               <p className="text-xs text-[#8c8276]">
                 Consultá consumos, contactá por WhatsApp y restá puntos inmediatamente cuando un socio realiza un canje.
@@ -1001,7 +1021,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
                   </label>
                   <input
                     type="tel"
-                    placeholder="+54 9 297 241-8890"
+                    placeholder="+54 9 11 3147-6953"
                     value={authPhone}
                     onChange={(e) => setAuthPhone(e.target.value)}
                     required

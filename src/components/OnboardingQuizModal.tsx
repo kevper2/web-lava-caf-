@@ -198,7 +198,6 @@ export const OnboardingQuizModal: React.FC<OnboardingQuizModalProps> = ({
       unitPrice: resultBean.prices['500g'],
       quantity: 1,
       frequency: 'one_time',
-      customNote: `Seleccionado por Test de Personalidad: ${resultBean.personality.title}`,
     };
     if (onDirectWhatsApp) {
       onDirectWhatsApp(cartItem);
@@ -304,12 +303,12 @@ export const OnboardingQuizModal: React.FC<OnboardingQuizModalProps> = ({
               </p>
             </div>
 
-            {/* Matched Origin Card */}
+            {/* Matched Coffee Style Card */}
             <div className="p-6 rounded-2xl bg-[#111111] border border-white/10 space-y-4">
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <div>
                   <span className="text-[10px] text-[#8c8276] uppercase tracking-wider block">
-                    Origen Recomendado
+                    Estilo Recomendado
                   </span>
                   <h4 className="text-lg font-bold text-white">
                     {resultBean.name} · {resultBean.country}

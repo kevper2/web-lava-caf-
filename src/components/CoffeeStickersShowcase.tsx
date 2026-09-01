@@ -31,9 +31,9 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   });
 
   const [selectedGrinds, setSelectedGrinds] = useState<Record<string, GrindType>>({
-    'andes-colombianos': 'Filtro',
-    'serra-da-mantiqueira': 'Prensa',
-    'alpi-italiane': 'Espresso',
+    'andes-colombianos': 'Granos',
+    'serra-da-mantiqueira': 'Granos',
+    'alpi-italiane': 'Granos',
   });
 
   const [addedAnimation, setAddedAnimation] = useState<string | null>(null);
@@ -110,17 +110,17 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
       {/* Section Header - Airy, clean, high presence */}
       <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
         <span className="text-[11px] uppercase tracking-[0.3em] text-[#d49a55] font-semibold">
-          Colección Permanente · 3 Arquetipos
+          Colección Permanente · 3 Estilos
         </span>
         <h2 className="text-3xl sm:text-5xl font-bold text-[#f7eedf] tracking-tight">
-          La Trilogía de Montaña
+          Los 3 Estilos de Montaña
         </h2>
         <p className="text-base text-[#9e9386] font-normal leading-relaxed pt-1">
-          Tres orígenes curados meticulosamente. Cada perfil expresa una personalidad sensorial única para elevar tu ritual diario.
+          Tres estilos de café curados meticulosamente. Cada perfil expresa una personalidad sensorial única para elevar tu ritual diario.
         </p>
       </div>
 
-      {/* 3 Origin Cards - Airy, Spacious, Minimalist Luxury */}
+      {/* 3 Coffee Style Cards - Perfectly aligned sections across cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-8 items-stretch">
         {displayBeans.map((bean) => {
           const currentSize = selectedSizes[bean.id] || '500g';
@@ -131,14 +131,14 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
           return (
             <div
               key={bean.id}
-              className="group relative flex flex-col justify-between rounded-3xl bg-[#080808] border border-white/[0.08] hover:border-[#d49a55]/40 transition-all duration-500 p-8 sm:p-10 shadow-[0_4px_30px_rgba(0,0,0,0.8)] hover:shadow-[0_10px_40px_rgba(212,154,85,0.08)]"
+              className="group relative flex flex-col justify-between rounded-3xl bg-[#080808] border border-white/[0.08] hover:border-[#d49a55]/40 transition-all duration-500 p-8 sm:p-10 shadow-[0_4px_30px_rgba(0,0,0,0.8)] hover:shadow-[0_10px_40px_rgba(212,154,85,0.08)] h-full"
             >
               {/* Subtle top ember glow on hover */}
               <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-[#d49a55]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              <div>
-                {/* Header of the Card: Personality Archetype & Altitude */}
-                <div className="flex items-start justify-between gap-4 pb-6 border-b border-white/5">
+              <div className="flex-1 flex flex-col">
+                {/* 1. Header of the Card: Archetype & Altitude (Fixed min-height for perfect alignment) */}
+                <div className="flex items-start justify-between gap-4 pb-6 border-b border-white/5 min-h-[72px]">
                   <div>
                     <span className="inline-block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#d49a55] mb-1">
                       {bean.personality.title}
@@ -147,7 +147,7 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                       {bean.name}
                     </h3>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <span className="text-xs font-semibold text-white/90 block">
                       {bean.altitude}
                     </span>
@@ -157,8 +157,8 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </div>
                 </div>
 
-                {/* Personality Quote / Essence */}
-                <div className="py-6 space-y-3">
+                {/* 2. Personality Quote & Description (Fixed min-height for perfect alignment) */}
+                <div className="py-6 space-y-2.5 min-h-[125px] flex flex-col justify-start">
                   <p className="text-xs italic text-[#c9bba8] leading-relaxed">
                     {bean.personality.quote}
                   </p>
@@ -167,8 +167,8 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </p>
                 </div>
 
-                {/* Tasting Notes Tags */}
-                <div className="space-y-2 pb-6 border-b border-white/5">
+                {/* 3. Tasting Notes Tags (Fixed min-height for perfect alignment) */}
+                <div className="space-y-2 pb-6 border-b border-white/5 min-h-[82px] flex flex-col justify-center">
                   <span className="text-[10px] uppercase tracking-widest text-[#6e655a] font-semibold block">
                     Notas de Cata
                   </span>
@@ -184,8 +184,8 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </div>
                 </div>
 
-                {/* Sensory Balance Indicators (Roast, Acidity, Body) */}
-                <div className="py-6 space-y-3">
+                {/* 4. Sensory Balance Indicators (Roast, Acidity, Body) (Fixed min-height for perfect alignment) */}
+                <div className="py-6 space-y-3 min-h-[110px] flex flex-col justify-center">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[#8c8276]">Tueste:</span>
                     <span className="text-[#e0d6c8] font-medium">{bean.roastTitle}</span>
@@ -209,8 +209,8 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </div>
                 </div>
 
-                {/* Configuration: Size & Grind */}
-                <div className="space-y-4 pt-2 pb-6">
+                {/* 5. Configuration: Size & Grind (Fixed min-height for perfect alignment) */}
+                <div className="space-y-4 pt-2 pb-6 min-h-[175px] flex flex-col justify-end">
                   {/* Size selector */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs">
@@ -259,9 +259,9 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                 </div>
               </div>
 
-              {/* Card Footer: Price, WhatsApp Checkout, and Quick Add */}
+              {/* 6. Card Footer: Price, WhatsApp Checkout, and Quick Add */}
               <div className="pt-6 border-t border-white/5 space-y-4">
-                <div className="flex items-baseline justify-between">
+                <div className="flex items-baseline justify-between min-h-[38px]">
                   <span className="text-xs text-[#7d7367]">Precio sugerido</span>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-[#f7eedf]">

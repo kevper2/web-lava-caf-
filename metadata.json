@@ -1,0 +1,6 @@
+{
+  "name": "LAVA Café de Montaña - Artisanal Coffee",
+  "description": "Artisanal mountain coffee landing experience with custom bean orders via WhatsApp checkout, subscription dashboard, delivery notifications, and Mountain Club loyalty program.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

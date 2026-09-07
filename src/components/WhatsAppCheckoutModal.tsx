@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CartItem, Order, GrindType, BagSize } from '../types';
+import { CartItem, Order, GrindType, BagSize, LoyaltyProfile } from '../types';
 import { LavaLogo } from './LavaLogo';
 import { calculateEarnedPointsFromItems } from '../data/coffeeData';
 import { 
@@ -13,6 +13,8 @@ import {
   ArrowRight, 
   Sparkles, 
   MapPin,
+  Mail,
+  ExternalLink,
   HelpCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -27,6 +29,7 @@ interface WhatsAppCheckoutModalProps {
   total: number;
   onOrderCreated: (order: Order) => void;
   directItem?: CartItem | null;
+  currentUserProfile?: LoyaltyProfile | null;
 }
 
 export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
@@ -39,16 +42,35 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
   total,
   onOrderCreated,
   directItem,
+  currentUserProfile,
 }) => {
-  // Form fields
-  const [name, setName] = useState('Santiago Villar');
-  const [phone, setPhone] = useState('+54 9 11 3147-6953');
-  const [email, setEmail] = useState('santiago@patagoniaprive.com');
-  const [address, setAddress] = useState('Barrio Las Pendientes');
+  // Form fields - Only prefill if user is logged in
+  const [name, setName] = useState(currentUserProfile?.customerName || '');
+  const [phone, setPhone] = useState(currentUserProfile?.phone || '+54 9 ');
+  const [email, setEmail] = useState(currentUserProfile?.email || '');
+  const [address, setAddress] = useState('');
+  const [mapsLink, setMapsLink] = useState('');
   const [city, setCity] = useState('San Martín de los Andes');
   const [province, setProvince] = useState('Neuquén');
   const [paymentMethod, setPaymentMethod] = useState<'Transferencia Bancaria' | 'MercadoPago' | 'Tarjeta de Crédito'>('Transferencia Bancaria');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Sync state if currentUserProfile changes or modal opens
+  React.useEffect(() => {
+    if (currentUserProfile) {
+      setName(currentUserProfile.customerName);
+      setPhone(currentUserProfile.phone);
+      setEmail(currentUserProfile.email);
+    } else {
+      setName('');
+      setPhone('+54 9 ');
+      setEmail('');
+      setAddress('');
+      setMapsLink('');
+    }
+    setErrorMessage(null);
+  }, [currentUserProfile, isOpen]);
 
   if (!isOpen) return null;
 
@@ -60,8 +82,23 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
 
   const handleGenerateWhatsAppOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !address.trim()) {
-      alert('Por favor completá los campos principales para coordinar tu envío.');
+    setErrorMessage(null);
+
+    if (!name.trim()) {
+      setErrorMessage('Por favor completá tu nombre y apellido.');
+      return;
+    }
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 8) {
+      setErrorMessage('Por favor completá un número de WhatsApp válido.');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setErrorMessage('Por favor completá un email válido para sumarte al Club Magma y enviarte el comprobante.');
+      return;
+    }
+    if (!address.trim()) {
+      setErrorMessage('Por favor indicá la dirección de entrega en San Martín de los Andes.');
       return;
     }
 
@@ -69,14 +106,17 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
     const orderId = `LAV-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const itemsSummary = itemsToCheckout
-      .map((item, idx) => `• *${item.beanName}* (${item.size} | Molienda ${item.grind}) x${item.quantity} -> $${(item.unitPrice * item.quantity).toLocaleString('es-AR')}`)
+      .map((item) => `• *${item.beanName}* (${item.size} | Molienda ${item.grind}) x${item.quantity} -> $${(item.unitPrice * item.quantity).toLocaleString('es-AR')}`)
       .join('\n');
+
+    const mapsLine = mapsLink.trim() ? `\n*Ubicación Google Maps:* ${mapsLink.trim()}` : '';
 
     const whatsappMessage = `*ORDEN DE CAFÉ LAVA #${orderId}*
 ━━━━━━━━━━━━━━━━━━━━
-*Cliente:* ${name}
-*Teléfono:* ${phone}
-*Dirección:* ${address}, ${city} (${province})
+*Cliente:* ${name.trim()}
+*WhatsApp:* ${phone.trim()}
+*Email:* ${email.trim()}
+*Dirección:* ${address.trim()}, ${city} (${province})${mapsLine}
 *Pago:* ${paymentMethod}
 
 *DETALLE DEL PEDIDO:*
@@ -91,12 +131,13 @@ _Enviado desde San Martín de los Andes_`;
     const newOrder: Order = {
       id: orderId,
       date: new Date().toISOString().split('T')[0],
-      customerName: name,
-      phone,
-      email,
-      address,
-      city,
-      province,
+      customerName: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      address: address.trim(),
+      mapsLink: mapsLink.trim() || undefined,
+      city: city.trim(),
+      province: province.trim(),
       paymentMethod,
       items: itemsToCheckout,
       subtotal: currentSubtotal,
@@ -149,7 +190,12 @@ _Enviado desde San Martín de los Andes_`;
           </p>
         </div>
 
-        <form onSubmit={handleGenerateWhatsAppOrder} className="space-y-6 pt-2">
+        <form onSubmit={handleGenerateWhatsAppOrder} className="space-y-5 pt-2">
+          {errorMessage && (
+            <div className="p-3.5 rounded-xl bg-red-950/60 border border-red-800/60 text-red-200 text-xs leading-relaxed font-semibold">
+              {errorMessage}
+            </div>
+          )}
           
           {/* Items Preview */}
           <div className="p-4 rounded-2xl bg-[#111111] border border-white/5 space-y-2">
@@ -174,31 +220,56 @@ _Enviado desde San Martín de los Andes_`;
             </div>
           </div>
 
-          {/* Contact Details */}
+          {/* Contact Details: Name, WhatsApp & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider">
+              <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                 Nombre Completo *
               </label>
               <input
                 type="text"
                 required
+                placeholder="Ej: Sofia Gómez"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-xs text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider">
+              <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                 WhatsApp de Contacto *
               </label>
               <input
                 type="tel"
                 required
+                placeholder="+54 9 11 3147-6953"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-xs text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+              />
+            </div>
+          </div>
+
+          {/* Email field (Mandatory for Club Magma auto-enrolment) */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                Email *
+              </label>
+              <span className="text-[10px] text-[#d49a55] font-medium">
+                Te sumamos automáticamente al Club Magma para sumar puntos
+              </span>
+            </div>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-[#8c8276] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="email"
+                required
+                placeholder="tuemail@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
               />
             </div>
           </div>
@@ -206,7 +277,7 @@ _Enviado desde San Martín de los Andes_`;
           {/* Delivery Address */}
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider">
+              <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                 Dirección de Entrega *
               </label>
               <input
@@ -215,32 +286,54 @@ _Enviado desde San Martín de los Andes_`;
                 placeholder="Calle y número / Barrio / Departamento"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-xs text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
               />
+            </div>
+
+            {/* Google Maps link field */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                  Link de Google Maps
+                </label>
+                <span className="text-[10px] text-[#8c8276]">
+                  Para accesos poco claros o cabañas de montaña
+                </span>
+              </div>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-[#8c8276] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="url"
+                  placeholder="https://maps.app.goo.gl/..."
+                  value={mapsLink}
+                  onChange={(e) => setMapsLink(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider">
+                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                   Ciudad
                 </label>
                 <input
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-xs text-white"
+                  className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider">
+                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                   Provincia
                 </label>
                 <input
                   type="text"
                   value={province}
                   onChange={(e) => setProvince(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-xs text-white"
+                  className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white"
                 />
               </div>
             </div>
@@ -248,7 +341,7 @@ _Enviado desde San Martín de los Andes_`;
 
           {/* Payment method */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
+            <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
               Método de Pago Preferido
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -279,8 +372,8 @@ _Enviado desde San Martín de los Andes_`;
               <MessageCircle className="w-5 h-5 text-[#4ade80]" />
               <span>{isSubmitting ? 'Abriendo WhatsApp...' : 'Confirmar Pedido por WhatsApp'}</span>
             </button>
-            <p className="text-center text-[10px] text-[#5e554a]">
-              Se abrirá un chat privado con el equipo LAVA en San Martín de los Andes para coordinar entrega y pago.
+            <p className="text-center text-[10px] text-[#7d7367]">
+              Se abrirá un chat directo con el equipo LAVA en San Martín de los Andes para coordinar entrega y pago.
             </p>
           </div>
 

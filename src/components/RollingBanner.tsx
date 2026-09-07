@@ -3,16 +3,18 @@ import React from 'react';
 interface RollingBannerProps {
   onOpenQuiz?: () => void;
   onNavigateClub?: () => void;
+  onNavigateCatalog?: () => void;
 }
 
 export const RollingBanner: React.FC<RollingBannerProps> = ({
   onOpenQuiz,
   onNavigateClub,
+  onNavigateCatalog,
 }) => {
   const marqueeItems = [
     {
       text: 'Envíos sin cargo en San Martín de los Andes comprando 500g o más',
-      action: null,
+      action: onNavigateCatalog,
       highlight: true,
     },
     {

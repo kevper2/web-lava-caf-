@@ -1,6 +1,6 @@
 import React from 'react';
 import { LavaLogo } from './LavaLogo';
-import { MapPin, MessageCircle, ArrowUp, ShieldCheck } from 'lucide-react';
+import { MapPin, MessageCircle, ArrowUp } from 'lucide-react';
 
 interface FooterProps {
   onNavigateTab: (tab: 'home' | 'catalog' | 'club' | 'guides' | 'crm') => void;
@@ -27,17 +27,24 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
           <div className="space-y-5 md:col-span-2">
             <LavaLogo size="xl" />
             <p className="text-xs text-[#8c8276] max-w-md leading-relaxed pt-1">
-              Café de montaña de calidad superior. Granos de altitud tostados con precisión y maestría. Envíos sin cargo en San Martín de los Andes.
+              Café de montaña de calidad superior. Granos de altitud tostados con precisión y maestría. Envíos sin cargo en San Martín de los Andes (desde el centro hasta Vega Maipú).
             </p>
 
-            <div className="space-y-2 pt-2 text-xs text-[#c9bba8]">
+            <div className="space-y-2 pt-2 text-xs sm:text-sm text-[#c9bba8]">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#d49a55] shrink-0" />
                 <span>San Martín de los Andes, Neuquén, Argentina</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-[#4ade80] shrink-0" />
-                <span>WhatsApp: +54 9 11 3147-6953</span>
+              <div>
+                <a
+                  href="https://wa.me/5491131476953?text=Hola%20Lava!%20Busco%20un%20rico%20caf%C3%A9%20para%20disfrutar%20mis%20d%C3%ADas%20en%20la%20monta%C3%B1a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-[#4ade80] transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#4ade80] shrink-0" />
+                  <span>WhatsApp: +54 9 11 3147-6953</span>
+                </a>
               </div>
             </div>
           </div>
@@ -47,7 +54,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
             <span className="text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold block">
               Navegación
             </span>
-            <ul className="space-y-2.5 text-xs text-[#8c8276]">
+            <ul className="space-y-2.5 text-xs sm:text-sm text-[#8c8276]">
               <li>
                 <button
                   onClick={() => onNavigateTab('catalog')}
@@ -80,15 +87,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
                   Guías de Barista
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => onNavigateTab('crm')}
-                  className="hover:text-[#d49a55] transition-colors cursor-pointer flex items-center gap-1.5"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#d49a55]" />
-                  <span>CRM & Gestión Admin</span>
-                </button>
-              </li>
             </ul>
           </div>
 
@@ -97,14 +95,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
             <span className="text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold block">
               Contacto Barista
             </span>
-            <p className="text-xs text-[#8c8276] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#8c8276] leading-relaxed">
               ¿Dudas con la molienda para tu cafetera o suscripción? Escribinos directamente por WhatsApp.
             </p>
             <a
-              href="https://wa.me/5491131476953?text=Hola%20LAVA!%20Quisiera%20asesoramiento%20para%20elegir%20mi%20caf%C3%A9"
+              href="https://wa.me/5491131476953?text=Hola%20Lava!%20Busco%20un%20rico%20caf%C3%A9%20para%20disfrutar%20mis%20d%C3%ADas%20en%20la%20monta%C3%B1a"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white text-xs font-semibold transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white text-xs sm:text-sm font-semibold transition-all"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Chatear con LAVA</span>
@@ -115,8 +113,18 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#5e554a]">
-          <div>
-            © {new Date().getFullYear()} LAVA Café de Montaña · San Martín de los Andes, Neuquén. Todos los derechos reservados.
+          <div className="flex items-center flex-wrap gap-1">
+            <span>
+              © {new Date().getFullYear()} LAVA Café de Montaña · San Martín de los Andes, Neuquén. Todos los derechos reservados.
+            </span>
+            <button
+              onClick={() => onNavigateTab('crm')}
+              className="text-[#24211c] hover:text-[#7d7367] transition-colors cursor-pointer text-[10px] ml-1 select-none font-mono"
+              title="Acceso Gestión Interna"
+              aria-label="Acceso Gestión"
+            >
+              [crm]
+            </button>
           </div>
 
           <button

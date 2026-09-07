@@ -16,11 +16,11 @@ export const BrandStory: React.FC = () => {
             Nuestra Filosofía
           </span>
           <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-[#f7eedf] tracking-tight leading-tight">
-            La pureza de la alta montaña aplicada al arte del café.
+            La pureza de la alta montaña aplicada al arte del café
           </h2>
 
           <p className="text-sm sm:text-base text-[#9e9386] font-normal leading-relaxed pt-2">
-            LAVA no es café más. Es un estándar intransigente de calidad nacido en el corazón de la cordillera patagónica para quienes reconocen la excelencia en el primer sorbo.
+            LAVA no es un café más. Es un estándar intransigente de calidad nacido en el corazón de la cordillera patagónica para quienes reconocen la excelencia en el primer sorbo.
           </p>
         </div>
 

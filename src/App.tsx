@@ -118,16 +118,14 @@ export function App() {
         tastingLog: [...newTastings, ...matchedClient.tastingLog],
       };
       setClients((prev) => prev.map((c) => (c.id === matchedClient!.id ? updatedClient : c)));
-      if (loyaltyProfile && loyaltyProfile.id === matchedClient.id) {
-        setLoyaltyProfile(updatedClient);
-      }
+      setLoyaltyProfile(updatedClient);
     } else {
       const newClientProfile: LoyaltyProfile = {
         id: `CLI-${Date.now().toString().slice(-4)}`,
         customerName: newOrder.customerName,
         phone: newOrder.phone,
         email: newOrder.email || `${newOrder.customerName.toLowerCase().replace(/\s+/g, '')}@magma.ar`,
-        tier: 'Privé',
+        tier: 'Socio Magma',
         points: newOrder.earnedPoints,
         lifetimePoints: newOrder.earnedPoints,
         ordersCount: 1,
@@ -136,9 +134,7 @@ export function App() {
         tastingLog: newTastings,
       };
       setClients((prev) => [newClientProfile, ...prev]);
-      if (loyaltyProfile) {
-        setLoyaltyProfile(newClientProfile);
-      }
+      setLoyaltyProfile(newClientProfile);
     }
   };
 
@@ -184,6 +180,7 @@ export function App() {
               onSelectBeanToCustomize={(bean) => handleOpenCustomizer(bean)}
               onDirectWhatsAppOrder={handleDirectWhatsAppOrder}
               onAddToCart={handleAddToCart}
+              onOpenQuiz={() => setIsQuizOpen(true)}
             />
           </div>
         )}
@@ -248,6 +245,7 @@ export function App() {
         total={total}
         onOrderCreated={handleOrderCreated}
         directItem={directCheckoutItem}
+        currentUserProfile={loyaltyProfile}
       />
 
       <OnboardingQuizModal

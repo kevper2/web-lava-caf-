@@ -18,6 +18,8 @@ export interface CoffeeBean {
   region: string;
   country: string;
   altitude: string;
+  shortSummary?: string;
+  representation?: string;
   personality: CoffeePersonality;
   notes: string[];
   roastTitle: string;
@@ -87,6 +89,7 @@ export interface Order {
   phone: string;
   email?: string;
   address: string;
+  mapsLink?: string;
   city: string;
   province: string;
   paymentMethod: 'Transferencia Bancaria' | 'MercadoPago' | 'Tarjeta de Crédito';
@@ -134,7 +137,7 @@ export interface LoyaltyProfile {
   customerName: string;
   phone: string;
   email: string;
-  tier: 'Privé' | 'Master Reserve' | 'Summit Elite';
+  tier: string;
   points: number;
   lifetimePoints: number;
   ordersCount: number;

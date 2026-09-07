@@ -11,6 +11,7 @@ interface CoffeeStickersShowcaseProps {
   onAddToCart: (item: CartItem | CoffeeBean, grind?: GrindType, size?: BagSize) => void;
   onDirectWhatsApp?: (item: CartItem) => void;
   onDirectWhatsAppOrder?: (bean: CoffeeBean, grind: GrindType, size: BagSize) => void;
+  onOpenQuiz?: () => void;
 }
 
 export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
@@ -20,6 +21,7 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   onAddToCart,
   onDirectWhatsApp,
   onDirectWhatsAppOrder,
+  onOpenQuiz,
 }) => {
   const displayBeans = beans && beans.length > 0 ? beans : COFFEE_BEANS;
 
@@ -39,7 +41,7 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   const [addedAnimation, setAddedAnimation] = useState<string | null>(null);
 
   const grindOptions: GrindType[] = ['Granos', 'Filtro', 'Espresso', 'Moka', 'Prensa'];
-  const sizeOptions: BagSize[] = ['250g', '500g', '1kg'];
+  const sizeOptions: BagSize[] = ['250g', '500g'];
 
   const handleSizeChange = (beanId: string, size: BagSize) => {
     setSelectedSizes((prev) => ({ ...prev, [beanId]: size }));
@@ -105,23 +107,39 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   };
 
   return (
-    <section id="catalog" className="py-24 sm:py-32 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
+    <section id="catalog" className="py-20 sm:py-28 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
       
-      {/* Section Header - Airy, clean, high presence */}
-      <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
-        <span className="text-[11px] uppercase tracking-[0.3em] text-[#d49a55] font-semibold">
-          Colección Permanente · 3 Estilos
-        </span>
-        <h2 className="text-3xl sm:text-5xl font-bold text-[#f7eedf] tracking-tight">
+      {/* Section Header - Following BrewingGuides spacing & structure */}
+      <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold">
+          <span>Colección Permanente · 3 Estilos</span>
+        </div>
+
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#f7eedf] tracking-tight">
           Los 3 Estilos de Montaña
         </h2>
-        <p className="text-base text-[#9e9386] font-normal leading-relaxed pt-1">
+
+        <p className="text-sm text-[#8c8276] leading-relaxed">
           Tres estilos de café curados meticulosamente. Cada perfil expresa una personalidad sensorial única para elevar tu ritual diario.
         </p>
+
+        {/* Link to Personality Quiz */}
+        {onOpenQuiz && (
+          <div className="pt-2">
+            <button
+              onClick={onOpenQuiz}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm text-[#d49a55] hover:text-[#e5a85b] transition-colors cursor-pointer group underline underline-offset-4 font-medium"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>¿No sabés cuál elegir? Hacé el Test de Personalidad de Café</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* 3 Coffee Style Cards - Perfectly aligned sections across cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-8 items-stretch">
+      {/* 3 Coffee Style Cards - Structured like a double-entry table with aligned horizontal rows */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-8 items-stretch">
         {displayBeans.map((bean) => {
           const currentSize = selectedSizes[bean.id] || '500g';
           const currentGrind = selectedGrinds[bean.id] || 'Granos';
@@ -131,52 +149,44 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
           return (
             <div
               key={bean.id}
-              className="group relative flex flex-col justify-between rounded-3xl bg-[#080808] border border-white/[0.08] hover:border-[#d49a55]/40 transition-all duration-500 p-8 sm:p-10 shadow-[0_4px_30px_rgba(0,0,0,0.8)] hover:shadow-[0_10px_40px_rgba(212,154,85,0.08)] h-full"
+              className="group relative flex flex-col justify-between rounded-3xl bg-[#080808] border border-white/[0.08] hover:border-[#d49a55]/40 transition-all duration-500 p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.8)] hover:shadow-[0_10px_40px_rgba(212,154,85,0.08)] h-full"
             >
               {/* Subtle top ember glow on hover */}
               <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-[#d49a55]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="flex-1 flex flex-col">
-                {/* 1. Header of the Card: Archetype & Altitude (Fixed min-height for perfect alignment) */}
-                <div className="flex items-start justify-between gap-4 pb-6 border-b border-white/5 min-h-[72px]">
-                  <div>
-                    <span className="inline-block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#d49a55] mb-1">
-                      {bean.personality.title}
-                    </span>
-                    <h3 className="text-2xl font-bold text-[#f7eedf] tracking-tight">
+                {/* 1. ROW 1: Header of the Card - Name, Altitude, Country & Short Description (Full text, aligned) */}
+                <div className="pb-5 border-b border-white/5 flex flex-col justify-between min-h-[125px] sm:min-h-[135px]">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#f7eedf] tracking-tight">
                       {bean.name}
                     </h3>
+                    <div className="text-right shrink-0">
+                      <span className="text-xs sm:text-sm font-semibold text-white/90 block">
+                        {bean.altitude}
+                      </span>
+                      <span className="text-[11px] text-[#8c8276] tracking-wider uppercase block">
+                        {bean.country}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-semibold text-white/90 block">
-                      {bean.altitude}
-                    </span>
-                    <span className="text-[10px] text-[#7d7367] tracking-wider uppercase">
-                      {bean.country}
-                    </span>
-                  </div>
+                  {bean.shortSummary && (
+                    <p className="text-xs text-[#b3a798] leading-relaxed mt-2">
+                      {bean.shortSummary}
+                    </p>
+                  )}
                 </div>
 
-                {/* 2. Personality Quote & Description (Fixed min-height for perfect alignment) */}
-                <div className="py-6 space-y-2.5 min-h-[125px] flex flex-col justify-start">
-                  <p className="text-xs italic text-[#c9bba8] leading-relaxed">
-                    {bean.personality.quote}
-                  </p>
-                  <p className="text-xs text-[#8c8276] leading-relaxed">
-                    {bean.personality.description}
-                  </p>
-                </div>
-
-                {/* 3. Tasting Notes Tags (Fixed min-height for perfect alignment) */}
-                <div className="space-y-2 pb-6 border-b border-white/5 min-h-[82px] flex flex-col justify-center">
-                  <span className="text-[10px] uppercase tracking-widest text-[#6e655a] font-semibold block">
+                {/* 2. ROW 2: Tasting Notes Tags - Clean full-tag rendering with leveled height */}
+                <div className="py-4 border-b border-white/5 min-h-[102px] flex flex-col justify-center space-y-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#7d7367] font-semibold block">
                     Notas de Cata
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 items-center">
                     {bean.flavorTags.map((tag, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 rounded-full text-[11px] bg-white/[0.03] border border-white/[0.08] text-[#e0d6c8] font-medium"
+                        className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-[#e0d6c8] font-medium leading-tight whitespace-nowrap"
                       >
                         {tag}
                       </span>
@@ -184,40 +194,79 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </div>
                 </div>
 
-                {/* 4. Sensory Balance Indicators (Roast, Acidity, Body) (Fixed min-height for perfect alignment) */}
-                <div className="py-6 space-y-3 min-h-[110px] flex flex-col justify-center">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#8c8276]">Tueste:</span>
-                    <span className="text-[#e0d6c8] font-medium">{bean.roastTitle}</span>
-                  </div>
-                  <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                    <div
-                      className="bg-[#d49a55] h-full rounded-full transition-all duration-700"
-                      style={{ width: `${bean.roastPercentage}%` }}
-                    />
+                {/* 3. ROW 3: Sensory Balance Indicators (Tueste, Acidez, Cuerpo) - Leveled height */}
+                <div className="py-5 border-b border-white/5 min-h-[180px] flex flex-col justify-between">
+                  {/* Tueste */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[#8c8276]">Tueste:</span>
+                      <span className="text-[#e0d6c8] font-medium">
+                        {bean.roastTitle}{bean.roastDesc ? ` · ${bean.roastDesc}` : ''}
+                      </span>
+                    </div>
+                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#d49a55] h-full rounded-full transition-all duration-700"
+                        style={{ width: `${bean.roastPercentage}%` }}
+                      />
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <span className="text-[#8c8276]">Cuerpo:</span>
-                    <span className="text-[#e0d6c8] font-medium">{bean.bodyTitle}</span>
+                  {/* Acidez */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[#8c8276]">Acidez:</span>
+                      <span className="text-[#e0d6c8] font-medium">{bean.acidityTitle}</span>
+                    </div>
+                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#e5a85b] h-full rounded-full transition-all duration-700"
+                        style={{ width: `${bean.acidityPercentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                    <div
-                      className="bg-[#c6894b] h-full rounded-full transition-all duration-700"
-                      style={{ width: `${bean.bodyPercentage}%` }}
-                    />
+
+                  {/* Cuerpo */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[#8c8276]">Cuerpo:</span>
+                      <span className="text-[#e0d6c8] font-medium">
+                        {bean.bodyTitle}{bean.bodyDesc && bean.bodyDesc !== bean.bodyTitle ? ` · ${bean.bodyDesc}` : ''}
+                      </span>
+                    </div>
+                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#c6894b] h-full rounded-full transition-all duration-700"
+                        style={{ width: `${bean.bodyPercentage}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* 5. Configuration: Size & Grind (Fixed min-height for perfect alignment) */}
-                <div className="space-y-4 pt-2 pb-6 min-h-[175px] flex flex-col justify-end">
+                {/* 4. Representation / Cómo se representa en el café - Full text, no truncation */}
+                <div className="my-4 min-h-[110px]">
+                  {bean.representation && (
+                    <div className="h-full p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col justify-between">
+                      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#d49a55] font-semibold shrink-0 mb-1">
+                        <Sparkles className="w-3 h-3 text-[#d49a55]" />
+                        <span>Cómo se representa en el café</span>
+                      </div>
+                      <p className="text-xs text-[#c9bba8] leading-relaxed italic">
+                        {bean.representation}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. ROW 5: Configuration Selectors (Size & Grind) - Aligned height */}
+                <div className="space-y-3.5 pb-5 min-h-[170px] flex flex-col justify-end">
                   {/* Size selector */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-[#8c8276]">Presentación</span>
                       <span className="text-[#d49a55] font-semibold">{currentSize}</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {sizeOptions.map((sz) => (
                         <button
                           key={sz}
@@ -238,17 +287,16 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-[#8c8276]">Molienda</span>
-                      <span className="text-[#e0d6c8]">{currentGrind}</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
                       {grindOptions.map((gr) => (
                         <button
                           key={gr}
                           onClick={() => handleGrindChange(bean.id, gr)}
-                          className={`py-1.5 text-[10px] rounded-lg font-medium transition-all cursor-pointer ${
+                          className={`py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${
                             currentGrind === gr
                               ? 'bg-[#d49a55] text-black font-bold'
-                              : 'bg-white/[0.02] text-[#7d7367] hover:text-white border border-white/5'
+                              : 'bg-white/[0.02] text-[#8c8276] hover:text-white border border-white/5'
                           }`}
                         >
                           {gr}
@@ -259,15 +307,14 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                 </div>
               </div>
 
-              {/* 6. Card Footer: Price, WhatsApp Checkout, and Quick Add */}
-              <div className="pt-6 border-t border-white/5 space-y-4">
-                <div className="flex items-baseline justify-between min-h-[38px]">
-                  <span className="text-xs text-[#7d7367]">Precio sugerido</span>
+              {/* 6. ROW 6: Card Footer (Price, WhatsApp Checkout, Quick Add) */}
+              <div className="pt-5 border-t border-white/5 space-y-3.5">
+                <div className="flex items-baseline justify-end min-h-[46px]">
                   <div className="text-right">
                     <span className="text-2xl font-bold text-[#f7eedf]">
                       ${currentPrice.toLocaleString('es-AR')}
                     </span>
-                    <span className="text-[10px] text-[#7d7367] block">ARS · Envío inmediato</span>
+                    <span className="text-[11px] text-[#8c8276] block">ARS · Envío sin cargo SMA</span>
                   </div>
                 </div>
 

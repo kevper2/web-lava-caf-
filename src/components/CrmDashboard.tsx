@@ -118,14 +118,8 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
       setAuthError(null);
       showToast('Sesión de Administrador CRM iniciada');
     } else {
-      setAuthError('Credenciales incorrectas. Usá admin@lavacafe.com / lava2026');
+      setAuthError('Credenciales incorrectas. Verifique su email y contraseña.');
     }
-  };
-
-  const handleFillDemoAdmin = () => {
-    setAdminEmail('admin@lavacafe.com');
-    setAdminPassword('lava2026');
-    setAuthError(null);
   };
 
   // Order Status update handler
@@ -204,7 +198,7 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
       customerName: newClientName.trim(),
       phone: newClientPhone.trim(),
       email: newClientEmail.trim() || `${newClientName.toLowerCase().replace(/\s+/g, '')}@cliente.ar`,
-      tier: 'Privé',
+      tier: 'Socio Magma',
       points: 0,
       lifetimePoints: 0,
       ordersCount: 0,
@@ -301,24 +295,6 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
             <p className="text-xs text-[#8c8276]">
               Panel de gestión integral: pedidos en curso, registro de clientes y administración de puntos.
             </p>
-          </div>
-
-          {/* Credentials Helper Box */}
-          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-[#d49a55]/25 space-y-2">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-[#a89d8f] font-medium">Credenciales de Acceso:</span>
-              <button
-                type="button"
-                onClick={handleFillDemoAdmin}
-                className="text-[#d49a55] font-bold hover:underline cursor-pointer"
-              >
-                Autocompletar
-              </button>
-            </div>
-            <div className="text-[11px] font-mono text-[#c9bba8] space-y-0.5 bg-black/40 p-2 rounded-xl border border-white/5">
-              <div>Usuario: <span className="text-[#f7eedf]">admin@lavacafe.com</span></div>
-              <div>Contraseña: <span className="text-[#f7eedf]">lava2026</span></div>
-            </div>
           </div>
 
           <form onSubmit={handleAdminLogin} className="space-y-4 relative z-10">
@@ -774,7 +750,7 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
               </span>
               <h4 className="text-xl font-bold text-white">10 gramos = 1 Punto</h4>
               <p className="text-xs text-[#8c8276]">
-                500g = 50 pts · 1kg = 100 pts · 250g = 25 pts. Se calculan automáticamente en compras.
+                500g = 50 pts · 250g = 25 pts. Se calculan automáticamente en compras.
               </p>
             </div>
 

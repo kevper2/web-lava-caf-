@@ -227,7 +227,6 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                         >
                           <option value="250g">250g</option>
                           <option value="500g">500g</option>
-                          <option value="1kg">1kg</option>
                         </select>
                       </div>
 

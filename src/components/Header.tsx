@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LavaLogo } from './LavaLogo';
 import { RollingBanner } from './RollingBanner';
 import { CartItem, LoyaltyProfile } from '../types';
-import { ShoppingBag, User, Menu, X, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, User, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: 'home' | 'catalog' | 'club' | 'guides' | 'crm';
@@ -34,12 +34,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const navLinks: { id: 'home' | 'catalog' | 'club' | 'guides' | 'crm'; label: string }[] = [
-    { id: 'home', label: 'Colección' },
+  const navLinks: { id: 'home' | 'catalog' | 'club' | 'guides'; label: string }[] = [
+    { id: 'home', label: '¿Qué es Lava?' },
     { id: 'catalog', label: 'Los 3 Estilos' },
     { id: 'club', label: 'CLUB MAGMA' },
     { id: 'guides', label: 'Guías Barista' },
-    { id: 'crm', label: 'CRM' },
   ];
 
   return (
@@ -48,6 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
       <RollingBanner
         onOpenQuiz={() => setIsQuizOpen(true)}
         onNavigateClub={() => setActiveTab('club')}
+        onNavigateCatalog={() => setActiveTab('catalog')}
       />
 
       <div
@@ -74,15 +74,12 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={link.id}
                 onClick={() => setActiveTab(link.id)}
-                className={`text-[10px] uppercase tracking-[0.25em] font-normal transition-colors cursor-pointer py-1 flex items-center gap-1.5 ${
+                className={`text-[10px] uppercase tracking-[0.25em] font-normal transition-colors cursor-pointer py-1 ${
                   activeTab === link.id
                     ? 'text-[#f5eedf] border-b border-[#d49a55]'
-                    : link.id === 'crm'
-                    ? 'text-[#a38b72] hover:text-[#f5eedf]'
                     : 'text-[#7d746a] hover:text-[#f5eedf]'
                 }`}
               >
-                {link.id === 'crm' && <ShieldCheck className="w-3 h-3 text-[#d49a55]" />}
                 <span>{link.label}</span>
               </button>
             ))}
@@ -156,11 +153,6 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 <span>{link.label}</span>
-                {link.id === 'crm' && (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-[#d49a55] font-mono">
-                    ADMIN
-                  </span>
-                )}
               </button>
             ))}
           </div>

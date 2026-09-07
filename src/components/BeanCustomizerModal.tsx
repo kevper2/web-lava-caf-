@@ -55,7 +55,6 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
   const sizeOptions: { size: BagSize; cups: string }[] = [
     { size: '250g', cups: 'Aprox 15 tazas' },
     { size: '500g', cups: 'Aprox 30 tazas' },
-    { size: '1kg', cups: 'Aprox 65 tazas' },
   ];
 
   const handleAddToCart = () => {
@@ -153,7 +152,7 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
             <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
               2. Tamaño de la Bolsa
             </label>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 gap-2.5">
               {sizeOptions.map((opt) => (
                 <button
                   key={opt.size}

@@ -41,6 +41,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'rewards' | 'log' | 'subscriptions'>('rewards');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Auth Form State (when logged out)
   const [isRegisterMode, setIsRegisterMode] = useState(false);
@@ -56,28 +57,61 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
   // Handle Login / Register for Member
   const handleAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authPhone) {
-      showToast('Por favor ingresá tu número de WhatsApp');
+    setAuthError(null);
+
+    const cleanPhone = authPhone.replace(/\D/g, '');
+    
+    if (cleanPhone.length < 8) {
+      setAuthError('Por favor ingresá un número de WhatsApp válido (mínimo 8 dígitos).');
       return;
     }
 
-    const cleanPhone = authPhone.replace(/\D/g, '');
-    const existing = allClients.find(
-      (c) => c.phone.replace(/\D/g, '').includes(cleanPhone) || 
-             (authEmail && c.email.toLowerCase() === authEmail.toLowerCase())
-    );
+    if (!isRegisterMode) {
+      // MODO INGRESO: Verificar estrictamente si el usuario existe
+      const existing = allClients.find(
+        (c) => c.phone.replace(/\D/g, '').includes(cleanPhone) || 
+               (authPhone && c.phone.trim() === authPhone.trim())
+      );
 
-    if (existing) {
-      onUpdateProfile(existing);
-      showToast(`¡Bienvenido de nuevo, ${existing.customerName}!`);
-      confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
+      if (existing) {
+        onUpdateProfile(existing);
+        showToast(`¡Bienvenido de nuevo, ${existing.customerName}!`);
+        try {
+          confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
+        } catch (err) {}
+      } else {
+        // NO EXISTE: Bloquear ingreso y exigir registro
+        setAuthError('No encontramos ninguna cuenta asociada a este número. Por favor registrate para unirte al Club Magma.');
+      }
     } else {
+      // MODO REGISTRO: Nombre, Teléfono y Email son OBLIGATORIOS
+      if (!authName.trim()) {
+        setAuthError('Por favor completá tu nombre.');
+        return;
+      }
+      if (!authEmail.trim() || !authEmail.includes('@')) {
+        setAuthError('Por favor ingresá un email válido.');
+        return;
+      }
+
+      // Verificar si ya existe
+      const existing = allClients.find(
+        (c) => c.phone.replace(/\D/g, '').includes(cleanPhone) || 
+               c.email.toLowerCase() === authEmail.trim().toLowerCase()
+      );
+
+      if (existing) {
+        onUpdateProfile(existing);
+        showToast(`¡Hola de nuevo, ${existing.customerName}!`);
+        return;
+      }
+
       const newProfile: LoyaltyProfile = {
         id: `CLI-${Date.now().toString().slice(-4)}`,
-        customerName: authName.trim() || 'Socio LAVA',
+        customerName: authName.trim(),
         phone: authPhone.trim(),
-        email: authEmail.trim() || `${authName.toLowerCase().replace(/\s+/g, '')}@magma.ar`,
-        tier: 'Privé',
+        email: authEmail.trim(),
+        tier: 'Socio Magma',
         points: 0,
         lifetimePoints: 0,
         ordersCount: 0,
@@ -88,7 +122,9 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
       setAllClients([newProfile, ...allClients]);
       onUpdateProfile(newProfile);
       showToast(`¡Bienvenido al CLUB MAGMA, ${newProfile.customerName}!`);
-      confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+      try {
+        confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+      } catch (err) {}
     }
   };
 
@@ -166,10 +202,28 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleAuthSubmit} className="space-y-3.5">
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {authError && (
+                <div className="p-3.5 rounded-xl bg-red-950/60 border border-red-800/60 text-red-200 text-xs leading-relaxed space-y-1">
+                  <p className="font-semibold">{authError}</p>
+                  {!isRegisterMode && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsRegisterMode(true);
+                        setAuthError(null);
+                      }}
+                      className="text-[#d49a55] underline hover:text-[#f7eedf] text-xs font-semibold cursor-pointer block mt-1"
+                    >
+                      Hacé clic acá para crear tu cuenta de socio
+                    </button>
+                  )}
+                </div>
+              )}
+
               {isRegisterMode && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-semibold text-[#8c8276] uppercase tracking-wider block">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                     Nombre Completo
                   </label>
                   <input
@@ -177,67 +231,71 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
                     value={authName}
                     onChange={(e) => setAuthName(e.target.value)}
                     placeholder="Ej: Sofia Gómez"
-                    required={isRegisterMode}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
+                    required
+                    className="w-full px-3.5 py-3 rounded-xl bg-black border border-white/15 text-white text-sm placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
                   />
                 </div>
               )}
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-[#8c8276] uppercase tracking-wider block">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                   WhatsApp de Contacto
                 </label>
                 <div className="relative">
-                  <Phone className="w-3.5 h-3.5 text-[#8c8276] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Phone className="w-4 h-4 text-[#8c8276] absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="tel"
                     value={authPhone}
                     onChange={(e) => setAuthPhone(e.target.value)}
                     placeholder="+54 9 11 3147-6953"
                     required
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
+                    className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-black border border-white/15 text-white text-sm placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
                   />
                 </div>
               </div>
 
               {isRegisterMode && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-semibold text-[#8c8276] uppercase tracking-wider block">
-                    Email (Opcional)
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                    Email
                   </label>
-                  <input
-                    type="email"
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    placeholder="sofia@ejemplo.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
-                  />
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-[#8c8276] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      placeholder="sofia@ejemplo.com"
+                      required
+                      className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-black border border-white/15 text-white text-sm placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
+                    />
+                  </div>
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-[#d49a55] hover:bg-[#e0a660] text-black font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#d49a55]/20 flex items-center justify-center gap-2 mt-2"
+                className="w-full py-3.5 rounded-xl bg-[#d49a55] hover:bg-[#e0a660] text-black font-bold text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-[#d49a55]/20 flex items-center justify-center gap-2 mt-3"
               >
                 <span>{isRegisterMode ? 'Unirme al Club Magma' : 'Ingresar al Portal'}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           </div>
 
           {/* Benefits Preview */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 max-w-3xl mx-auto text-center">
-            <div className="p-4 rounded-2xl bg-white/[0.015] border border-white/5 space-y-1">
-              <span className="text-[#d49a55] font-bold text-xs">10g = 1 Punto</span>
-              <p className="text-[11px] text-[#8c8276]">Sumás automáticamente en cada bolsa de café</p>
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1.5">
+              <span className="text-[#d49a55] font-bold text-xs sm:text-sm">10g = 1 Punto</span>
+              <p className="text-xs text-[#8c8276]">Sumás automáticamente en cada bolsa de café</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/[0.015] border border-white/5 space-y-1">
-              <span className="text-[#d49a55] font-bold text-xs">Recompensas Reserva</span>
-              <p className="text-[11px] text-[#8c8276]">Cafés 250g de cortesía y kits de montaña</p>
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1.5">
+              <span className="text-[#d49a55] font-bold text-xs sm:text-sm">Recompensas Exclusivas</span>
+              <p className="text-xs text-[#8c8276]">Granos de café, descuentos, promociones y kits para el ritual diario</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/[0.015] border border-white/5 space-y-1">
-              <span className="text-[#d49a55] font-bold text-xs">Bitácora Personal</span>
-              <p className="text-[11px] text-[#8c8276]">Historial de orígenes y moliendas favoritas</p>
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-1.5">
+              <span className="text-[#d49a55] font-bold text-xs sm:text-sm">Bitácora Personal</span>
+              <p className="text-xs text-[#8c8276]">Historial de orígenes y moliendas favoritas</p>
             </div>
           </div>
 

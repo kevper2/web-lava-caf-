@@ -25,17 +25,75 @@ export function App() {
   // Initial cart starts clean/empty
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   
-  // Orders registry in CRM
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  // Orders registry in CRM with persistent storage
+  const [orders, setOrders] = useState<Order[]>(() => {
+    try {
+      const saved = localStorage.getItem('lava_orders');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Error reading stored orders', e);
+    }
+    return INITIAL_ORDERS;
+  });
+
+  // Save orders to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('lava_orders', JSON.stringify(orders));
+    } catch (e) {
+      console.warn('Error saving orders to localStorage', e);
+    }
+  }, [orders]);
   
   // Subscriptions state
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(INITIAL_SUBSCRIPTIONS);
   
-  // Complete clients list in CRM
-  const [clients, setClients] = useState<LoyaltyProfile[]>(INITIAL_CLIENTS);
+  // Complete clients list in CRM with persistent storage
+  const [clients, setClients] = useState<LoyaltyProfile[]>(() => {
+    try {
+      const saved = localStorage.getItem('lava_clients');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Error reading stored clients', e);
+    }
+    return INITIAL_CLIENTS;
+  });
+
+  // Save clients to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('lava_clients', JSON.stringify(clients));
+    } catch (e) {
+      console.warn('Error saving clients to localStorage', e);
+    }
+  }, [clients]);
   
   // Starts logged out (null) as requested
-  const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltyProfile | null>(null);
+  const [loyaltyProfile, setLoyaltyProfile] = useState<LoyaltyProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem('lava_active_member');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+
+  // Save active member profile
+  useEffect(() => {
+    try {
+      if (loyaltyProfile) {
+        localStorage.setItem('lava_active_member', JSON.stringify(loyaltyProfile));
+      } else {
+        localStorage.removeItem('lava_active_member');
+      }
+    } catch (e) {}
+  }, [loyaltyProfile]);
+
+  // Redirect club tab while in pause
+  useEffect(() => {
+    if (activeTab === 'club') {
+      setActiveTab('catalog');
+    }
+  }, [activeTab]);
 
   // Modals state
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -185,8 +243,8 @@ export function App() {
           </div>
         )}
 
-        {/* CLUB MAGMA: Versión Compacta para Socios */}
-        {activeTab === 'club' && (
+        {/* CLUB MAGMA: En pausa por el momento para retomar en un futuro */}
+        {/* {activeTab === 'club' && (
           <div className="pt-20 sm:pt-24 lg:pt-28">
             <LoyaltyClub
               currentProfile={loyaltyProfile}
@@ -199,7 +257,7 @@ export function App() {
               setAllClients={setClients}
             />
           </div>
-        )}
+        )} */}
 
         {/* CRM ADMINISTRATIVO */}
         {activeTab === 'crm' && (

@@ -14,9 +14,11 @@ import {
   Phone, 
   LogOut,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  FileSpreadsheet
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { exportMagmaLogToExcel } from '../utils/excelExport';
 
 interface LoyaltyClubProps {
   currentProfile: LoyaltyProfile | null;
@@ -429,7 +431,24 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
 
           {/* SUB-TAB 2: BITACORA DE CATAS */}
           {activeTab === 'log' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-[#0e0e0e] border border-white/5">
+                <div className="text-xs text-[#8c8276]">
+                  <span className="text-white font-semibold">Registro histórico de catas</span> · Guardado en tu perfil Magma
+                </div>
+                <button
+                  onClick={() => {
+                    exportMagmaLogToExcel([currentProfile]);
+                    showToast('Bitácora descargada en formato Excel (.xls)');
+                  }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+                  title="Descargar mi bitácora en archivo de Excel"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Descargar Bitácora Excel</span>
+                </button>
+              </div>
+
               {currentProfile.tastingLog.length === 0 ? (
                 <div className="p-8 text-center rounded-2xl bg-[#090909] border border-white/5 space-y-2">
                   <Coffee className="w-8 h-8 text-[#4c443b] mx-auto" />

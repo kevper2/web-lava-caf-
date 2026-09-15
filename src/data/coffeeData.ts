@@ -30,7 +30,7 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     prices: {
       '250g': 20000,
       '500g': 38000,
-      '1kg': 73000,
+      '1kg': 70000,
     },
     image: '/src/assets/images/lava_hero_mountain_1788194433698.jpg',
     accentColor: '#d49a55',
@@ -67,9 +67,9 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     bodyDesc: 'Equilibrado',
     bodyPercentage: 50,
     prices: {
-      '250g': 19000,
+      '250g': 18000,
       '500g': 34000,
-      '1kg': 66000,
+      '1kg': 64000,
     },
     image: '/src/assets/images/lava_roasted_beans_1788194453416.jpg',
     accentColor: '#c6894b',
@@ -107,7 +107,7 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     bodyPercentage: 100,
     prices: {
       '250g': 19000,
-      '500g': 34000,
+      '500g': 36000,
       '1kg': 66000,
     },
     image: '/src/assets/images/lava_brewing_ritual_1788194473817.jpg',
@@ -119,6 +119,23 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     description: 'Inspirado en la cultura de refugios de alta montaña del norte italiano. Un tueste profundo con notas intensas a cacao amargo, maderas nobles y nuez moscada que impone su presencia con autoridad.',
   },
 ];
+
+export const PACK_MAGMA = {
+  id: 'pack-magma',
+  name: 'Pack Magma · Degustación 3 Orígenes',
+  subtitle: 'Degustación de los 3 paquetes de 250g',
+  description: 'Degustación completa con los 3 paquetes diferentes de 250g (Serra da Mantiqueira, Alpi Italiane y Andes Colombianos) con un 10% de descuento especial.',
+  beans: [
+    { name: 'Serra da Mantiqueira', size: '250g', regularPrice: 18000 },
+    { name: 'Alpi Italiane', size: '250g', regularPrice: 19000 },
+    { name: 'Andes Colombianos', size: '250g', regularPrice: 20000 },
+  ],
+  totalGrams: 750,
+  regularPrice: 57000,
+  discountPercentage: 10,
+  discountAmount: 5700,
+  finalPrice: 51300,
+};
 
 export const DEMO_CLIENTS: LoyaltyProfile[] = [
   {
@@ -426,6 +443,22 @@ export const BREWING_GUIDES: BrewingGuide[] = [
       'Tampado parejo y horizontal con 15kg de presión.',
       'Iniciar la erogación inmediatamente: 36g de líquido en taza en 27 segundos.',
       'Mezclar la crema con cuchara y disfrutar al instante.',
+    ],
+  },
+  {
+    id: 'coldbrew',
+    name: 'Cold Brew',
+    grind: 'Gruesa · Sal marina gruesa',
+    ratio: '1:8 (Maceración lenta en frío)',
+    temp: 'Agua fría / natural (15°C)',
+    time: '16-20 horas',
+    description: 'Maceración lenta por inmersión en frío. Brinda una Lava refrescante, dulce, con cuerpo sedoso y mínima acidez.',
+    steps: [
+      'Pesar café molido grueso y colocar en frasco o jarra hermética.',
+      'Verter agua fría filtrada cubriendo la molienda en su totalidad.',
+      'Revolver delicadamente durante 30 segundos para saturar los granos.',
+      'Refrigerar de 16 a 20 horas en heladera sin mover.',
+      'Filtrar lentamente a través de papel o tela y servir con hielo.',
     ],
   },
 ];

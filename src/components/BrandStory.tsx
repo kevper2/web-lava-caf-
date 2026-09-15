@@ -56,10 +56,10 @@ export const BrandStory: React.FC = () => {
               <Award className="w-5 h-5" />
             </div>
             <h3 className="text-lg font-bold text-[#f7eedf] pt-1">
-              Experiencia Club Magma
+              Atención Directa Barista
             </h3>
             <p className="text-xs text-[#8c8276] leading-relaxed">
-              Grandes beneficios con tu membresía. Tu café se despacha con asesoramiento dedicado vía WhatsApp, atención directa sin intermediarios.
+              Asesoramiento barista dedicado vía WhatsApp. Pedidos directos sin intermediarios y atención personalizada desde San Martín de los Andes.
             </p>
           </div>
 

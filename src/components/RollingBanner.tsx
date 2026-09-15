@@ -2,13 +2,11 @@ import React from 'react';
 
 interface RollingBannerProps {
   onOpenQuiz?: () => void;
-  onNavigateClub?: () => void;
   onNavigateCatalog?: () => void;
 }
 
 export const RollingBanner: React.FC<RollingBannerProps> = ({
   onOpenQuiz,
-  onNavigateClub,
   onNavigateCatalog,
 }) => {
   const marqueeItems = [
@@ -18,12 +16,17 @@ export const RollingBanner: React.FC<RollingBannerProps> = ({
       highlight: true,
     },
     {
-      text: 'Beneficios exclusivos con la membresía del Club Magma',
-      action: onNavigateClub,
+      text: 'Pack Magma: Degustación de los 3 paquetes de 250g con 10% de descuento',
+      action: onNavigateCatalog,
       highlight: false,
     },
     {
-      text: 'Hacé el test de personalidad para encontrar el estilo de café que te representa',
+      text: 'Retiro sin costo por el Centro o Villa Vega San Martín',
+      action: onNavigateCatalog,
+      highlight: false,
+    },
+    {
+      text: 'Hacé el test de personalidad para encontrar el café que mejor te representa',
       action: onOpenQuiz,
       highlight: false,
     },

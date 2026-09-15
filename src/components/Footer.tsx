@@ -73,14 +73,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab, onOpenQuiz }) => 
               </li>
               <li>
                 <button
-                  onClick={() => onNavigateTab('club')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  CLUB MAGMA
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => onNavigateTab('guides')}
                   className="hover:text-white transition-colors cursor-pointer"
                 >

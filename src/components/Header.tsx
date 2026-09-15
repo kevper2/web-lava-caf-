@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LavaLogo } from './LavaLogo';
 import { RollingBanner } from './RollingBanner';
 import { CartItem, LoyaltyProfile } from '../types';
-import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { ShoppingBag, MessageCircle, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: 'home' | 'catalog' | 'club' | 'guides' | 'crm';
@@ -34,10 +34,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const navLinks: { id: 'home' | 'catalog' | 'club' | 'guides'; label: string }[] = [
+  const navLinks: { id: 'home' | 'catalog' | 'guides'; label: string }[] = [
     { id: 'home', label: '¿Qué es Lava?' },
     { id: 'catalog', label: 'Los 3 Estilos' },
-    { id: 'club', label: 'CLUB MAGMA' },
     { id: 'guides', label: 'Guías Barista' },
   ];
 
@@ -46,7 +45,6 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Rolling announcement banner */}
       <RollingBanner
         onOpenQuiz={() => setIsQuizOpen(true)}
-        onNavigateClub={() => setActiveTab('club')}
         onNavigateCatalog={() => setActiveTab('catalog')}
       />
 
@@ -85,30 +83,20 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </nav>
 
-          {/* Right actions: Member Portal & Cart Trigger */}
+          {/* Right actions: WhatsApp Contact & Cart Trigger */}
           <div className="flex items-center gap-2.5 sm:gap-3.5">
             
-            {/* Club Privé / Member Portal Trigger */}
-            <button
-              onClick={() => setActiveTab('club')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all cursor-pointer text-[11px] ${
-                activeTab === 'club'
-                  ? 'bg-white/10 border-[#d49a55] text-white'
-                  : 'bg-white/[0.02] border-white/10 text-[#8e8477] hover:text-white hover:border-white/20'
-              }`}
+            {/* Direct WhatsApp Barista */}
+            <a
+              href="https://wa.me/5491131476953?text=Hola%20Lava!%20Busco%20un%20rico%20caf%C3%A9%20para%20disfrutar%20mis%20d%C3%ADas%20en%20la%20monta%C3%B1a"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#2d6335]/70 bg-[#1b3820]/80 hover:bg-[#234b2a] text-[#4ade80] hover:text-white transition-all cursor-pointer text-[11px] font-semibold"
+              title="Chatear por WhatsApp"
             >
-              <User className="w-3 h-3 text-[#d49a55]" />
-              {loyaltyProfile ? (
-                <>
-                  <span className="hidden sm:inline font-normal">{loyaltyProfile.customerName.split(' ')[0]}</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[8.5px] bg-[#d49a55]/20 font-bold text-[#d49a55]">
-                    {loyaltyProfile.points} pts
-                  </span>
-                </>
-              ) : (
-                <span className="font-medium text-xs">CLUB MAGMA</span>
-              )}
-            </button>
+              <MessageCircle className="w-3.5 h-3.5 text-[#4ade80]" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
 
             {/* Cart Trigger */}
             <button
@@ -158,16 +146,15 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="pt-3 border-t border-white/10">
-            <button
-              onClick={() => {
-                setActiveTab('club');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#d49a55] text-black text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+            <a
+              href="https://wa.me/5491131476953?text=Hola%20Lava!%20Busco%20un%20rico%20caf%C3%A9%20para%20disfrutar%20mis%20d%C3%ADas%20en%20la%20monta%C3%B1a"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2.5 px-4 rounded-xl bg-[#1b3820] border border-[#2d6335] text-[#4ade80] hover:text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
             >
-              <User className="w-4 h-4" />
-              <span>{loyaltyProfile ? `Mi Cuenta (${loyaltyProfile.customerName.split(' ')[0]})` : 'Ingresar al Club Magma'}</span>
-            </button>
+              <MessageCircle className="w-4 h-4" />
+              <span>Consultar por WhatsApp</span>
+            </a>
           </div>
         </div>
       )}

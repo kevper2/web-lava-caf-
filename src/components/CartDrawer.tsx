@@ -1,6 +1,6 @@
 import React from 'react';
 import { CartItem } from '../types';
-import { X, Trash2, ShoppingBag, MessageCircle, Sparkles, RefreshCw, ShieldCheck } from 'lucide-react';
+import { X, Trash2, ShoppingBag, MessageCircle, Sparkles, RefreshCw, ShieldCheck, Truck } from 'lucide-react';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -142,6 +142,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span>Total Estimado:</span>
                   <span className="text-[#d49a55]">${subtotal.toLocaleString('es-AR')} ARS</span>
                 </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#14110d] border border-[#d49a55]/20 text-[11px] text-[#a89d8f] space-y-1">
+                <div className="flex items-center gap-1.5 text-[#f7eedf] font-semibold text-xs">
+                  <Truck className="w-3.5 h-3.5 text-[#d49a55]" />
+                  <span>Envío gratis desde 500g</span>
+                </div>
+                <p className="text-[10px] text-[#8c8276] leading-relaxed">
+                  Sin costo entre Centro y La Vega Maipú. O elegí retiro sin cargo por Centro o Villa Vega San Martín.
+                </p>
               </div>
 
               <button

@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { CartItem, Order, GrindType, BagSize, LoyaltyProfile } from '../types';
 import { LavaLogo } from './LavaLogo';
-import { calculateEarnedPointsFromItems } from '../data/coffeeData';
 import { 
   X, 
   MessageCircle, 
-  ShieldCheck, 
   Truck, 
   Check, 
-  CreditCard, 
-  Building2, 
-  ArrowRight, 
   Sparkles, 
   MapPin,
   Mail,
-  ExternalLink,
-  HelpCircle
+  Plus
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -52,9 +46,15 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
   const [mapsLink, setMapsLink] = useState('');
   const [city, setCity] = useState('San Martín de los Andes');
   const [province, setProvince] = useState('Neuquén');
-  const [paymentMethod, setPaymentMethod] = useState<'Transferencia Bancaria' | 'MercadoPago' | 'Tarjeta de Crédito'>('Transferencia Bancaria');
+  const [isPickup, setIsPickup] = useState(false);
+  const [pickupLocation, setPickupLocation] = useState<'Centro' | 'Villa Vega San Martín'>('Centro');
+  const [paymentMethod, setPaymentMethod] = useState<'Transferencia Bancaria' | 'MercadoPago'>('Transferencia Bancaria');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Pack Magma degustación state (exclusivo en granos)
+  const [includePackMagma, setIncludePackMagma] = useState(false);
+  const packMagmaGrind: GrindType = 'Granos';
 
   // Sync state if currentUserProfile changes or modal opens
   React.useEffect(() => {
@@ -68,21 +68,59 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
       setEmail('');
       setAddress('');
       setMapsLink('');
+      setIsPickup(false);
+      setPickupLocation('Centro');
     }
+
+    if (directItem?.beanId === 'pack-magma') {
+      setIncludePackMagma(true);
+    } else {
+      setIncludePackMagma(false);
+    }
+
     setErrorMessage(null);
-  }, [currentUserProfile, isOpen]);
+  }, [currentUserProfile, isOpen, directItem]);
 
   if (!isOpen) return null;
 
-  const itemsToCheckout = directItem ? [directItem] : cartItems;
-  const currentSubtotal = directItem ? directItem.unitPrice * directItem.quantity : subtotal;
-  const currentDiscount = directItem ? 0 : discount;
+  const isPackMagmaDirect = directItem?.beanId === 'pack-magma';
+  const baseItems = directItem && !isPackMagmaDirect ? [directItem] : (isPackMagmaDirect ? [] : cartItems);
+  const baseSubtotal = directItem && !isPackMagmaDirect ? directItem.unitPrice * directItem.quantity : (isPackMagmaDirect ? 0 : subtotal);
+  const baseDiscount = directItem ? 0 : discount;
+
+  const packRegularPrice = 57000;
+  const packDiscount = 5700; // 10% OFF
+  const packFinalPrice = 51300;
+
+  const currentSubtotal = baseSubtotal + (includePackMagma ? packRegularPrice : 0);
+  const currentDiscount = baseDiscount + (includePackMagma ? packDiscount : 0);
   const currentShipping = 0;
   const currentTotal = currentSubtotal - currentDiscount + currentShipping;
+
+  // Calculate total grams in current order
+  const baseGrams = baseItems.reduce((acc, item) => {
+    let grams = 250;
+    const lower = item.size.toLowerCase();
+    if (lower.includes('1kg') || lower.includes('1000')) {
+      grams = 1000;
+    } else if (lower.includes('500')) {
+      grams = 500;
+    } else if (lower.includes('250')) {
+      grams = 250;
+    }
+    return acc + grams * item.quantity;
+  }, 0);
+
+  const totalGrams = baseGrams + (includePackMagma ? 750 : 0);
 
   const handleGenerateWhatsAppOrder = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    if (baseItems.length === 0 && !includePackMagma) {
+      setErrorMessage('Por favor seleccioná al menos un café o activá el Pack Magma degustación para continuar con el pedido.');
+      return;
+    }
 
     if (!name.trim()) {
       setErrorMessage('Por favor completá tu nombre y apellido.');
@@ -94,29 +132,39 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
       return;
     }
     if (!email.trim() || !email.includes('@')) {
-      setErrorMessage('Por favor completá un email válido para sumarte al Club Magma y enviarte el comprobante.');
+      setErrorMessage('Por favor completá un email válido para enviarte el comprobante y detalle de despacho.');
       return;
     }
-    if (!address.trim()) {
-      setErrorMessage('Por favor indicá la dirección de entrega en San Martín de los Andes.');
+    if (!isPickup && !address.trim()) {
+      setErrorMessage('Por favor indicá la dirección de entrega en San Martín de los Andes, o seleccioná la opción de pasar a buscarlo sin costo.');
       return;
     }
 
     setIsSubmitting(true);
     const orderId = `LAV-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const itemsSummary = itemsToCheckout
-      .map((item) => `• *${item.beanName}* (${item.size} | Molienda ${item.grind}) x${item.quantity} -> $${(item.unitPrice * item.quantity).toLocaleString('es-AR')}`)
-      .join('\n');
+    const regularLines = baseItems.map(
+      (item) => `• *${item.beanName}* (${item.size} | Molienda ${item.grind}) x${item.quantity} -> $${(item.unitPrice * item.quantity).toLocaleString('es-AR')}`
+    );
 
-    const mapsLine = mapsLink.trim() ? `\n*Ubicación Google Maps:* ${mapsLink.trim()}` : '';
+    const packLines = includePackMagma
+      ? [`• *Pack Magma · Degustación 3 Orígenes (En Granos)* (3 x 250g: Serra da Mantiqueira + Alpi Italiane + Andes Colombianos) -> $${packFinalPrice.toLocaleString('es-AR')} ARS (10% OFF aplicado)`]
+      : [];
+
+    const itemsSummary = [...regularLines, ...packLines].join('\n');
+
+    const mapsLine = (!isPickup && mapsLink.trim()) ? `\n*Ubicación Google Maps:* ${mapsLink.trim()}` : '';
+
+    const deliveryDetail = isPickup
+      ? `*Modalidad:* Retiro sin costo (Take Away)\n*Punto de Retiro:* ${pickupLocation} (San Martín de los Andes)`
+      : `*Modalidad:* Envío a domicilio\n*Dirección:* ${address.trim()}, ${city} (${province})${mapsLine}`;
 
     const whatsappMessage = `*ORDEN DE CAFÉ LAVA #${orderId}*
 ━━━━━━━━━━━━━━━━━━━━
 *Cliente:* ${name.trim()}
 *WhatsApp:* ${phone.trim()}
 *Email:* ${email.trim()}
-*Dirección:* ${address.trim()}, ${city} (${province})${mapsLine}
+${deliveryDetail}
 *Pago:* ${paymentMethod}
 
 *DETALLE DEL PEDIDO:*
@@ -126,7 +174,19 @@ ${itemsSummary}
 ━━━━━━━━━━━━━━━━━━━━
 _Enviado desde San Martín de los Andes_`;
 
-    const earnedPoints = calculateEarnedPointsFromItems(itemsToCheckout);
+    const orderItems: CartItem[] = [...baseItems];
+    if (includePackMagma) {
+      orderItems.push({
+        id: `pack-magma-${Date.now()}`,
+        beanId: 'pack-magma',
+        beanName: 'Pack Magma · Degustación 3x250g en Granos (10% OFF)',
+        grind: 'Granos',
+        size: '250g',
+        unitPrice: packFinalPrice,
+        quantity: 1,
+        frequency: 'one_time',
+      });
+    }
 
     const newOrder: Order = {
       id: orderId,
@@ -134,19 +194,19 @@ _Enviado desde San Martín de los Andes_`;
       customerName: name.trim(),
       phone: phone.trim(),
       email: email.trim(),
-      address: address.trim(),
-      mapsLink: mapsLink.trim() || undefined,
-      city: city.trim(),
-      province: province.trim(),
+      address: isPickup ? `Retiro sin costo: ${pickupLocation}` : address.trim(),
+      mapsLink: isPickup ? undefined : (mapsLink.trim() || undefined),
+      city: isPickup ? 'San Martín de los Andes' : city.trim(),
+      province: isPickup ? 'Neuquén' : province.trim(),
       paymentMethod,
-      items: itemsToCheckout,
+      items: orderItems,
       subtotal: currentSubtotal,
       discount: currentDiscount,
       shipping: currentShipping,
       total: currentTotal,
       status: 'confirmado',
       trackingCode: `LAVA-SMA-${Math.floor(10000 + Math.random() * 90000)}`,
-      earnedPoints,
+      earnedPoints: 0,
     };
 
     onOrderCreated(newOrder);
@@ -186,7 +246,7 @@ _Enviado desde San Martín de los Andes_`;
             Checkout Directo por WhatsApp
           </h3>
           <p className="text-xs text-[#8c8276] mt-1">
-            Coordiná tu despacho directamente con nuestra tostaduría en San Martín de los Andes.
+            Coordiná tu despacho directamente en San Martín de los Andes.
           </p>
         </div>
 
@@ -196,14 +256,69 @@ _Enviado desde San Martín de los Andes_`;
               {errorMessage}
             </div>
           )}
+
+          {/* Oferta Destacada al entrar en el Checkout: Pack Magma Degustación (Exclusivo en Granos) */}
+          <div className={`p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${
+            includePackMagma
+              ? 'bg-gradient-to-br from-[#1c150c] to-[#0e0c0a] border-[#d49a55] shadow-lg shadow-[#d49a55]/10'
+              : 'bg-[#12100e] border-[#d49a55]/30 hover:border-[#d49a55]/60'
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#d49a55]/15 border border-[#d49a55]/35 text-[#d49a55] text-[10px] font-bold uppercase tracking-wider">
+                  <Sparkles className="w-3 h-3 text-[#d49a55]" />
+                  <span>Oferta Especial · Exclusivo en Granos (10% OFF)</span>
+                </div>
+                <h4 className="text-sm sm:text-base font-bold text-[#f7eedf]">
+                  Pack Magma · Degustación 3 Orígenes en Granos (250g c/u)
+                </h4>
+                <p className="text-xs text-[#a89d8f] leading-relaxed">
+                  Degustación en grano entero con los 3 paquetes diferentes de 250g (<strong className="text-[#f7eedf] font-semibold">Serra da Mantiqueira</strong> + <strong className="text-[#f7eedf] font-semibold">Alpi Italiane</strong> + <strong className="text-[#f7eedf] font-semibold">Andes Colombianos</strong>). Oferta exclusiva en granos con un 10% de descuento.
+                </p>
+                <div className="flex items-baseline gap-2 pt-1">
+                  <span className="text-base sm:text-lg font-extrabold text-[#f7eedf]">
+                    ${packFinalPrice.toLocaleString('es-AR')} ARS
+                  </span>
+                  <span className="text-xs text-[#7d7367] line-through">
+                    ${packRegularPrice.toLocaleString('es-AR')}
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-semibold">
+                    (Ahorrás ${packDiscount.toLocaleString('es-AR')} · 10% OFF)
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIncludePackMagma(!includePackMagma)}
+                className={`shrink-0 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  includePackMagma
+                    ? 'bg-[#d49a55] text-black shadow-md'
+                    : 'bg-white/10 hover:bg-white/20 text-[#f7eedf] border border-white/15'
+                }`}
+              >
+                {includePackMagma ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>Pack en Granos Agregado</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Agregar Pack Magma (Granos)</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
           
           {/* Items Preview */}
           <div className="p-4 rounded-2xl bg-[#111111] border border-white/5 space-y-2">
             <span className="text-[10px] uppercase tracking-widest text-[#7d7367] font-semibold block">
-              Resumen de Selección
+              Resumen del Pedido
             </span>
-            <div className="space-y-1.5 max-h-36 overflow-y-auto">
-              {itemsToCheckout.map((item, idx) => (
+            <div className="space-y-2 max-h-44 overflow-y-auto">
+              {baseItems.map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-xs">
                   <span className="text-[#e0d6c8]">
                     {item.beanName} ({item.size} · {item.grind}) x{item.quantity}
@@ -213,8 +328,37 @@ _Enviado desde San Martín de los Andes_`;
                   </span>
                 </div>
               ))}
+
+              {includePackMagma && (
+                <div className="flex justify-between items-start text-xs p-2 rounded-xl bg-[#d49a55]/10 border border-[#d49a55]/20">
+                  <div className="space-y-0.5">
+                    <span className="text-[#f7eedf] font-semibold flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-[#d49a55]" />
+                      Pack Magma Degustación (3 x 250g · En Granos)
+                    </span>
+                    <span className="text-[10px] text-[#a89d8f] block">
+                      Serra da Mantiqueira + Alpi Italiane + Andes Colombianos (10% OFF)
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-semibold text-white block">
+                      ${packFinalPrice.toLocaleString('es-AR')}
+                    </span>
+                    <span className="text-[10px] text-[#7d7367] line-through">
+                      ${packRegularPrice.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {baseItems.length === 0 && !includePackMagma && (
+                <p className="text-xs text-[#7d7367] italic py-1">
+                  Tu carrito está vacío. Agregá cafés o sumá el Pack Magma degustación.
+                </p>
+              )}
             </div>
-            <div className="pt-2 border-t border-white/5 flex justify-between items-center text-sm font-bold text-[#d49a55]">
+
+            <div className="pt-2.5 border-t border-white/5 flex justify-between items-center text-sm font-bold text-[#d49a55]">
               <span>Total a Abonar:</span>
               <span>${currentTotal.toLocaleString('es-AR')} ARS</span>
             </div>
@@ -251,14 +395,14 @@ _Enviado desde San Martín de los Andes_`;
             </div>
           </div>
 
-          {/* Email field (Mandatory for Club Magma auto-enrolment) */}
+          {/* Email field */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
                 Email *
               </label>
-              <span className="text-[10px] text-[#d49a55] font-medium">
-                Te sumamos automáticamente al Club Magma para sumar puntos
+              <span className="text-[10px] text-[#a89d8f]">
+                Para enviarte el comprobante y detalle de despacho
               </span>
             </div>
             <div className="relative">
@@ -274,69 +418,191 @@ _Enviado desde San Martín de los Andes_`;
             </div>
           </div>
 
-          {/* Delivery Address */}
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
-                Dirección de Entrega *
+          {/* Delivery Address & Pickup Mode */}
+          <div className="space-y-3.5">
+            
+            {/* Tic para pasar a buscarlo sin costo */}
+            <div className="p-3.5 rounded-2xl bg-[#121212] border border-white/10 space-y-3 transition-all">
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <div className="relative flex items-center justify-center mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={isPickup}
+                    onChange={(e) => setIsPickup(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                    isPickup 
+                      ? 'bg-[#d49a55] border-[#d49a55] text-black' 
+                      : 'bg-[#1a1a1a] border-white/20 peer-hover:border-white/40 text-transparent'
+                  }`}>
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#f7eedf]">
+                      Pasar a buscarlo sin costo (Take Away)
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-600/40 text-emerald-400 text-[10px] font-semibold">
+                      Sin Costo
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#8c8276] mt-0.5">
+                    Habilitá este tic para retirar personalmente tu pedido por el Centro o por Villa Vega San Martín.
+                  </p>
+                </div>
               </label>
-              <input
-                type="text"
-                required
-                placeholder="Calle y número / Barrio / Departamento"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
-              />
+
+              {/* Selector de puntos de retiro cuando el tic está activo */}
+              {isPickup && (
+                <div className="pt-3 border-t border-white/5 space-y-2 animate-in fade-in duration-200">
+                  <span className="text-[10px] uppercase tracking-wider font-semibold text-[#a39788] block">
+                    Seleccioná tu punto de retiro:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPickupLocation('Centro')}
+                      className={`p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 border transition-all text-left cursor-pointer ${
+                        pickupLocation === 'Centro'
+                          ? 'bg-[#d49a55]/15 border-[#d49a55] text-white shadow-sm'
+                          : 'bg-[#161616] border-white/5 text-[#8c8276] hover:text-white hover:border-white/10'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        pickupLocation === 'Centro' ? 'border-[#d49a55] bg-[#d49a55]' : 'border-white/30'
+                      }`}>
+                        {pickupLocation === 'Centro' && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
+                      </div>
+                      <div>
+                        <span className="block text-[#f7eedf] font-medium">Centro</span>
+                        <span className="block text-[10px] text-[#8c8276]">San Martín de los Andes</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPickupLocation('Villa Vega San Martín')}
+                      className={`p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 border transition-all text-left cursor-pointer ${
+                        pickupLocation === 'Villa Vega San Martín'
+                          ? 'bg-[#d49a55]/15 border-[#d49a55] text-white shadow-sm'
+                          : 'bg-[#161616] border-white/5 text-[#8c8276] hover:text-white hover:border-white/10'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        pickupLocation === 'Villa Vega San Martín' ? 'border-[#d49a55] bg-[#d49a55]' : 'border-white/30'
+                      }`}>
+                        {pickupLocation === 'Villa Vega San Martín' && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
+                      </div>
+                      <div>
+                        <span className="block text-[#f7eedf] font-medium">Villa Vega San Martín</span>
+                        <span className="block text-[10px] text-[#8c8276]">Punto Tostaduría / Residencial</span>
+                      </div>
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-[#d49a55] mt-1 flex items-center gap-1.5">
+                    <Sparkles className="w-3 h-3 flex-shrink-0" />
+                    <span>Te pasamos por WhatsApp la dirección exacta y coordinamos el horario para que pases a buscarlo.</span>
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Google Maps link field */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
-                  Link de Google Maps
-                </label>
-                <span className="text-[10px] text-[#8c8276]">
-                  Para accesos poco claros o cabañas de montaña
-                </span>
+            {/* Dirección de entrega (cuando NO es retiro) */}
+            {!isPickup ? (
+              <div className="space-y-4 pt-1 animate-in fade-in duration-200">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                    Dirección de Entrega *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Calle y número / Barrio / Departamento"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+                  />
+                </div>
+
+                {/* Google Maps link field */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                      Link de Google Maps
+                    </label>
+                    <span className="text-[10px] text-[#8c8276]">
+                      Para accesos poco claros o cabañas de montaña
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-[#8c8276] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="url"
+                      placeholder="https://maps.app.goo.gl/..."
+                      value={mapsLink}
+                      onChange={(e) => setMapsLink(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                      Ciudad
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
+                      Provincia
+                    </label>
+                    <input
+                      type="text"
+                      value={province}
+                      onChange={(e) => setProvince(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="relative">
-                <MapPin className="w-4 h-4 text-[#8c8276] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="url"
-                  placeholder="https://maps.app.goo.gl/..."
-                  value={mapsLink}
-                  onChange={(e) => setMapsLink(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white placeholder:text-[#5e554a] focus:outline-none focus:border-[#d49a55]"
-                />
+            ) : null}
+
+            {/* Apartado informativo: Envíos gratis mínimo 500g Centro a Vega Maipú */}
+            <div className="p-3.5 rounded-2xl bg-[#14110d] border border-[#d49a55]/25 flex items-start gap-3 text-xs leading-relaxed">
+              <div className="p-2 rounded-xl bg-[#d49a55]/10 border border-[#d49a55]/30 text-[#d49a55] flex-shrink-0 mt-0.5">
+                <Truck className="w-4 h-4" />
+              </div>
+              <div className="space-y-1 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-bold text-[#f7eedf] text-xs">
+                    Zona de Envío sin Cargo
+                  </span>
+                  {totalGrams >= 500 ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/40 text-emerald-400 text-[10px] font-semibold">
+                      <Check className="w-3 h-3" />
+                      <span>¡Envío gratis activado! ({totalGrams}g)</span>
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-[#1c1611] border border-[#d49a55]/30 text-[#d49a55] text-[10px] font-medium">
+                      Pedido actual: {totalGrams}g (mín. 500g)
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-[#a89d8f]">
+                  Los pedidos son <strong className="text-white font-semibold">gratis comprando un mínimo de 500g</strong> en la zona comprendida entre el <span className="text-[#f7eedf] font-medium">centro de San Martín de los Andes</span> y <span className="text-[#f7eedf] font-medium">La Vega Maipú</span>.
+                </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
-                  Ciudad
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
-                  Provincia
-                </label>
-                <input
-                  type="text"
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[#141414] border border-white/10 text-sm text-white"
-                />
-              </div>
-            </div>
           </div>
 
           {/* Payment method */}
@@ -344,8 +610,8 @@ _Enviado desde San Martín de los Andes_`;
             <label className="text-xs font-semibold text-[#a39788] uppercase tracking-wider block">
               Método de Pago Preferido
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['Transferencia Bancaria', 'MercadoPago', 'Tarjeta de Crédito'] as const).map((m) => (
+            <div className="grid grid-cols-2 gap-2.5">
+              {(['Transferencia Bancaria', 'MercadoPago'] as const).map((m) => (
                 <button
                   key={m}
                   type="button"
@@ -356,7 +622,7 @@ _Enviado desde San Martín de los Andes_`;
                       : 'bg-[#111111] text-[#7d7367] border border-white/5 hover:text-white'
                   }`}
                 >
-                  {m === 'Transferencia Bancaria' ? 'Transferencia' : m}
+                  {m === 'Transferencia Bancaria' ? 'Transferencia Bancaria' : 'MercadoPago'}
                 </button>
               ))}
             </div>

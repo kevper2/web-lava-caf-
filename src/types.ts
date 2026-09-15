@@ -100,7 +100,7 @@ export interface Order {
   total: number;
   status: OrderStatus;
   trackingCode: string;
-  earnedPoints: number;
+  earnedPoints?: number;
 }
 
 export interface Subscription {
@@ -151,6 +151,16 @@ export interface LoyaltyProfile {
     orderId: string;
   }[];
   memberSince: string;
+}
+
+export interface PointLog {
+  id: string;
+  clientId: string;
+  clientName: string;
+  pointsDelta: number;
+  reason: string;
+  date: string;
+  performedBy: string;
 }
 
 export interface PersonalityQuizAnswer {

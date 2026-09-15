@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Order, LoyaltyProfile, OrderStatus } from '../types';
 import { 
   ShieldCheck, 
@@ -24,9 +24,17 @@ import {
   RefreshCw,
   Award,
   Filter,
-  FileText
+  FileText,
+  FileSpreadsheet,
+  Download
 } from 'lucide-react';
 import { LavaLogo } from './LavaLogo';
+import { 
+  exportOrdersToExcel, 
+  exportMagmaLogToExcel, 
+  exportPointsAuditToExcel, 
+  exportMasterCrmToExcel 
+} from '../utils/excelExport';
 
 interface CrmDashboardProps {
   orders: Order[];
@@ -75,26 +83,43 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
   const [pointsActionType, setPointsActionType] = useState<'add' | 'deduct'>('deduct');
   const [pointsAmount, setPointsAmount] = useState<number>(50);
   const [pointsReason, setPointsReason] = useState<string>('Canje de beneficio en tostador');
-  const [pointLogs, setPointLogs] = useState<PointLog[]>([
-    {
-      id: 'log-1',
-      clientId: 'CLI-001',
-      clientName: 'Santiago Villar',
-      pointsDelta: -150,
-      reason: 'Canje Bolsa 250g Café Andes',
-      date: '01/09/2026 10:15',
-      performedBy: 'Admin LAVA',
-    },
-    {
-      id: 'log-2',
-      clientId: 'CLI-002',
-      clientName: 'Florencia de la Serna',
-      pointsDelta: 50,
-      reason: 'Compra 500g Alpi Italiane',
-      date: '31/08/2026 18:30',
-      performedBy: 'Sistema Checkout',
+  const [pointLogs, setPointLogs] = useState<PointLog[]>(() => {
+    try {
+      const saved = localStorage.getItem('lava_point_logs');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Error reading point logs', e);
     }
-  ]);
+    return [
+      {
+        id: 'log-1',
+        clientId: 'CLI-001',
+        clientName: 'Santiago Villar',
+        pointsDelta: -150,
+        reason: 'Canje Bolsa 250g Café Andes',
+        date: '01/09/2026 10:15',
+        performedBy: 'Admin LAVA',
+      },
+      {
+        id: 'log-2',
+        clientId: 'CLI-002',
+        clientName: 'Florencia de la Serna',
+        pointsDelta: 50,
+        reason: 'Compra 500g Alpi Italiane',
+        date: '31/08/2026 18:30',
+        performedBy: 'Sistema Checkout',
+      }
+    ];
+  });
+
+  // Save pointLogs to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('lava_point_logs', JSON.stringify(pointLogs));
+    } catch (e) {
+      console.warn('Error saving point logs', e);
+    }
+  }, [pointLogs]);
 
   // New Client Modal State
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
@@ -115,6 +140,8 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
       (adminEmail.toLowerCase() === 'admin' && adminPassword === 'lava')
     ) {
       setIsAdminLoggedIn(true);
+      setAdminEmail('');
+      setAdminPassword('');
       setAuthError(null);
       showToast('Sesión de Administrador CRM iniciada');
     } else {
@@ -315,9 +342,10 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="admin@lavacafe.com"
+                  placeholder=""
+                  autoComplete="off"
                   required
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-transparent focus:outline-none focus:border-[#d49a55]"
                 />
               </div>
             </div>
@@ -332,9 +360,10 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
                   type="password"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder=""
+                  autoComplete="new-password"
                   required
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-black border border-white/10 text-white text-xs placeholder-transparent focus:outline-none focus:border-[#d49a55]"
                 />
               </div>
             </div>
@@ -385,13 +414,30 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
         </div>
 
         {/* Action button & Logout */}
-        <div className="flex flex-wrap items-center gap-3 relative z-10">
+        <div className="flex flex-wrap items-center gap-2.5 relative z-10">
           <button
-            onClick={() => setIsAdminLoggedIn(false)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-[#a89d8f] hover:text-white text-xs font-semibold transition-all cursor-pointer"
+            onClick={() => {
+              exportMasterCrmToExcel(orders, clients, pointLogs);
+              showToast('Archivo Excel consolidado (.xls) descargado');
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 text-xs font-semibold transition-all cursor-pointer shadow-lg shadow-emerald-950/40"
+            title="Exportar base completa consolidada a Excel"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Exportar Todo (Excel)</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsAdminLoggedIn(false);
+              setAdminEmail('');
+              setAdminPassword('');
+              setAuthError(null);
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-[#a89d8f] hover:text-white text-xs font-semibold transition-all cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5 text-red-400" />
-            <span>Cerrar Sesión Admin</span>
+            <span>Cerrar Sesión</span>
           </button>
         </div>
       </div>
@@ -437,25 +483,69 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
         </div>
 
         {/* Quick action buttons per tab */}
-        {crmTab === 'orders' && (
-          <button
-            onClick={handleAddSampleOrder}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-[#d49a55] font-semibold transition-all cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Generar Pedido Demo</span>
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {crmTab === 'orders' && (
+            <>
+              <button
+                onClick={() => {
+                  exportOrdersToExcel(orders);
+                  showToast('Listado de pedidos descargado en formato Excel (.xls)');
+                }}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+                title="Exportar pedidos a Excel"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Exportar Pedidos (Excel)</span>
+              </button>
 
-        {crmTab === 'clients' && (
-          <button
-            onClick={() => setIsNewClientModalOpen(true)}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#d49a55] text-black text-xs font-bold transition-all cursor-pointer hover:bg-[#e0a660]"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Nuevo Cliente</span>
-          </button>
-        )}
+              <button
+                onClick={handleAddSampleOrder}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-[#d49a55] font-semibold transition-all cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Generar Pedido Demo</span>
+              </button>
+            </>
+          )}
+
+          {crmTab === 'clients' && (
+            <>
+              <button
+                onClick={() => {
+                  exportMagmaLogToExcel(clients);
+                  showToast('Cartera de clientes y bitácora Magma descargada (.xls)');
+                }}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+                title="Exportar clientes y bitácora Magma a Excel"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Exportar Clientes & Magma (Excel)</span>
+              </button>
+
+              <button
+                onClick={() => setIsNewClientModalOpen(true)}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#d49a55] text-black text-xs font-bold transition-all cursor-pointer hover:bg-[#e0a660]"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Nuevo Cliente</span>
+              </button>
+            </>
+          )}
+
+          {crmTab === 'points' && (
+            <button
+              onClick={() => {
+                exportPointsAuditToExcel(pointLogs);
+                showToast('Auditoría de puntos descargada en Excel (.xls)');
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+              title="Exportar auditoría de puntos a Excel"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Exportar Auditoría Puntos (Excel)</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ========================================================
@@ -717,6 +807,17 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
                       Ajustar Puntos
                     </button>
 
+                    <button
+                      onClick={() => {
+                        exportMagmaLogToExcel([client]);
+                        showToast(`Bitácora de ${client.customerName} exportada a Excel`);
+                      }}
+                      className="p-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/40 transition-all cursor-pointer"
+                      title="Descargar Bitácora Magma de este cliente en Excel"
+                    >
+                      <FileSpreadsheet className="w-4 h-4" />
+                    </button>
+
                     <a
                       href={`https://wa.me/${client.phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(client.customerName)},%20te%20escribimos%20desde%20LAVA%20Caf%C3%A9%20de%20Monta%C3%B1a.`}
                       target="_blank"
@@ -795,9 +896,21 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
 
           {/* Audit Logs Table */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-[#f7eedf] tracking-tight">
-              Registro Histórico de Movimientos de Puntos
-            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-lg font-bold text-[#f7eedf] tracking-tight">
+                Registro Histórico de Movimientos de Puntos
+              </h3>
+              <button
+                onClick={() => {
+                  exportPointsAuditToExcel(pointLogs);
+                  showToast('Auditoría descargada en formato Excel (.xls)');
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-700/50 text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Exportar Auditoría (Excel)</span>
+              </button>
+            </div>
 
             <div className="rounded-2xl bg-[#0c0c0c] border border-white/10 overflow-hidden">
               <div className="overflow-x-auto">

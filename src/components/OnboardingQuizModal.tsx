@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CoffeeBean, CartItem, GrindType, BagSize } from '../types';
 import { COFFEE_BEANS } from '../data/coffeeData';
 import { LavaLogo } from './LavaLogo';
 import { X, Sparkles, ArrowRight, MessageCircle, Check, RefreshCw, Zap, Compass, Flame } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
 
 interface OnboardingQuizModalProps {
   isOpen: boolean;
@@ -40,6 +40,17 @@ export const OnboardingQuizModal: React.FC<OnboardingQuizModalProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [resultBean, setResultBean] = useState<CoffeeBean | null>(null);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -160,17 +171,7 @@ export const OnboardingQuizModal: React.FC<OnboardingQuizModalProps> = ({
 
       const matchedBean = validBeans.find((b) => b.id === topBeanId) || validBeans[0];
       setResultBean(matchedBean);
-
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.6 },
-          colors: ['#d49a55', '#ffffff', '#c6894b'],
-        });
-      } catch (e) {
-        // silent
-      }
+      triggerCoffeeBeanConfetti();
     }
   };
 
@@ -184,18 +185,18 @@ export const OnboardingQuizModal: React.FC<OnboardingQuizModalProps> = ({
     if (!resultBean) return;
 
     if (onDirectWhatsAppOrder) {
-      onDirectWhatsAppOrder(resultBean, 'Granos', '500g');
+      onDirectWhatsAppOrder(resultBean, 'Granos', '250g');
       onClose();
       return;
     }
 
     const cartItem: CartItem = {
-      id: `${resultBean.id}-500g-Granos-${Date.now()}`,
+      id: `${resultBean.id}-250g-Granos-${Date.now()}`,
       beanId: resultBean.id,
       beanName: resultBean.name,
       grind: 'Granos',
-      size: '500g',
-      unitPrice: resultBean.prices['500g'],
+      size: '250g',
+      unitPrice: resultBean.prices['250g'],
       quantity: 1,
       frequency: 'one_time',
     };
@@ -334,10 +335,10 @@ export const OnboardingQuizModal: React.FC<OnboardingQuizModalProps> = ({
             <div className="space-y-3 pt-2">
               <button
                 onClick={handleDirectWhatsAppResult}
-                className="w-full py-4 px-6 rounded-2xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg"
+                className="w-full py-4 px-6 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg"
               >
-                <MessageCircle className="w-4 h-4 text-[#4ade80]" />
-                <span>Pedir este Café vía WhatsApp (500g)</span>
+                <MessageCircle className="w-4 h-4" />
+                <span>Pedir este Café vía WhatsApp (250g)</span>
               </button>
 
               <div className="grid grid-cols-2 gap-3">

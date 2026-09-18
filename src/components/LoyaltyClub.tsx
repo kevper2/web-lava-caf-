@@ -17,8 +17,8 @@ import {
   ShieldCheck,
   FileSpreadsheet
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { exportMagmaLogToExcel } from '../utils/excelExport';
+import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
 
 interface LoyaltyClubProps {
   currentProfile: LoyaltyProfile | null;
@@ -78,9 +78,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
       if (existing) {
         onUpdateProfile(existing);
         showToast(`¡Bienvenido de nuevo, ${existing.customerName}!`);
-        try {
-          confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
-        } catch (err) {}
+        triggerCoffeeBeanConfetti({ y: 0.6 });
       } else {
         // NO EXISTE: Bloquear ingreso y exigir registro
         setAuthError('No encontramos ninguna cuenta asociada a este número. Por favor registrate para unirte al Club Magma.');
@@ -124,9 +122,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
       setAllClients([newProfile, ...allClients]);
       onUpdateProfile(newProfile);
       showToast(`¡Bienvenido al CLUB MAGMA, ${newProfile.customerName}!`);
-      try {
-        confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
-      } catch (err) {}
+      triggerCoffeeBeanConfetti({ y: 0.6 });
     }
   };
 
@@ -156,7 +152,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
     }
 
     const message = `*SOLICITUD DE CANJE CLUB MAGMA*\nHola LAVA, soy *${currentProfile.customerName}* (ID: ${currentProfile.id}).\nQuisiera canjear mi beneficio de *${reward.title}* (${reward.pointsCost} pts).\nMi saldo actual es de ${currentProfile.points} pts.`;
-    const waUrl = `https://wa.me/5491131476953?text=${encodeURIComponent(message)}`;
+    const waUrl = `https://wa.me/5492972544894?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank');
   };
 
@@ -249,7 +245,7 @@ export const LoyaltyClub: React.FC<LoyaltyClubProps> = ({
                     type="tel"
                     value={authPhone}
                     onChange={(e) => setAuthPhone(e.target.value)}
-                    placeholder="+54 9 11 3147-6953"
+                    placeholder="+54 9 2972 54-4894"
                     required
                     className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-black border border-white/15 text-white text-sm placeholder-[#5c5449] focus:outline-none focus:border-[#d49a55]"
                   />

@@ -92,7 +92,7 @@ export interface Order {
   mapsLink?: string;
   city: string;
   province: string;
-  paymentMethod: 'Transferencia Bancaria' | 'MercadoPago' | 'Tarjeta de Crédito';
+  paymentMethod: 'Transferencia Bancaria' | 'MercadoPago' | 'Coordinar con Tostaduría' | string;
   items: CartItem[];
   subtotal: number;
   discount: number;

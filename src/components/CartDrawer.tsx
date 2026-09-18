@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CartItem } from '../types';
 import { X, Trash2, ShoppingBag, MessageCircle, Sparkles, RefreshCw, ShieldCheck, Truck } from 'lucide-react';
 
@@ -17,6 +17,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   setCartItems,
   onOpenCheckout,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleUpdateQuantity = (itemId: string, newQty: number) => {
@@ -64,7 +74,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           </div>
 
           {/* Cart Items List */}
-          <div className="flex-1 p-6 overflow-y-auto space-y-4">
+          <div className="flex-1 p-6 overflow-y-auto modal-scrollbar space-y-4">
             {cartItems.length === 0 ? (
               <div className="py-20 text-center text-[#7d7367] space-y-3">
                 <ShoppingBag className="w-10 h-10 mx-auto text-[#4d453d]" />
@@ -159,9 +169,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   onClose();
                   onOpenCheckout();
                 }}
-                className="w-full py-4 px-6 rounded-2xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-lg shadow-black/50"
+                className="w-full py-4 px-6 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-lg shadow-black/50"
               >
-                <MessageCircle className="w-4 h-4 text-[#4ade80]" />
+                <MessageCircle className="w-4 h-4" />
                 <span>Pedir por WhatsApp Ahora</span>
               </button>
 

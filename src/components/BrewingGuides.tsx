@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BREWING_GUIDES } from '../data/coffeeData';
 import { Sparkles, Clock, Thermometer, Scale, Coffee, Droplets } from 'lucide-react';
+import { ScrollReveal } from './ScrollReveal';
 
 interface MethodConfig {
   min: number;
@@ -128,45 +129,51 @@ export const BrewingGuides: React.FC = () => {
     <section id="guides" className="py-24 sm:py-32 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
       
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Calibración de Extracción Barista</span>
+      <ScrollReveal>
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Calibración de Extracción Barista</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#f7eedf] tracking-tight">
+            Guías de Preparación Barista
+          </h2>
+
+          <p className="text-sm text-[#8c8276] leading-relaxed space-y-0.5">
+            <span className="block">Calibrá el <span className="text-[#f7eedf] font-medium">Volúmen de Lava deseada</span> en cada método.</span>
+            <span className="block">Las proporciones y cada paso del protocolo se recalculan de forma dinámica.</span>
+          </p>
         </div>
-
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#f7eedf] tracking-tight">
-          Guías de Preparación Barista
-        </h2>
-
-        <p className="text-sm text-[#8c8276] leading-relaxed">
-          Calibrá el <span className="text-[#f7eedf] font-medium">Volúmen de Lava deseada</span> en cada método. Las proporciones y cada paso del protocolo se recalculan de forma dinámica.
-        </p>
-      </div>
+      </ScrollReveal>
 
       {/* Method Selector Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 max-w-4xl mx-auto mb-12">
-        {BREWING_GUIDES.map((guide) => {
-          const isSelected = guide.id === activeGuideId;
-          return (
-            <button
-              key={guide.id}
-              onClick={() => setActiveGuideId(guide.id)}
-              className={`p-4 rounded-2xl border text-center transition-all cursor-pointer ${
-                isSelected
-                  ? 'bg-white/10 border-[#d49a55] text-white shadow-lg ring-1 ring-[#d49a55]/40'
-                  : 'bg-[#090909] border-white/5 text-[#8c8276] hover:text-white hover:border-white/10'
-              }`}
-            >
-              <div className="font-bold text-xs sm:text-sm">{guide.name}</div>
-              <div className="text-[10px] text-[#d49a55] mt-1 font-medium">{guide.grind}</div>
-            </button>
-          );
-        })}
-      </div>
+      <ScrollReveal delay={0.1}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 max-w-4xl mx-auto mb-12">
+          {BREWING_GUIDES.map((guide) => {
+            const isSelected = guide.id === activeGuideId;
+            return (
+              <button
+                key={guide.id}
+                onClick={() => setActiveGuideId(guide.id)}
+                className={`p-4 rounded-2xl border text-center transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-white/10 border-[#d49a55] text-white shadow-lg ring-1 ring-[#d49a55]/40'
+                    : 'bg-[#090909] border-white/5 text-[#8c8276] hover:text-white hover:border-white/10'
+                }`}
+              >
+                <div className="font-bold text-xs sm:text-sm">{guide.name}</div>
+                <div className="text-[10px] text-[#d49a55] mt-1 font-medium">{guide.grind}</div>
+              </button>
+            );
+          })}
+        </div>
+      </ScrollReveal>
 
       {/* Active Guide Content */}
-      <div className="max-w-4xl mx-auto rounded-3xl bg-[#090909] border border-white/10 p-6 sm:p-10 shadow-2xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <ScrollReveal delay={0.2}>
+        <div className="max-w-4xl mx-auto rounded-3xl bg-[#090909] border border-white/10 p-6 sm:p-10 shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Left Specs & Calculator */}
           <div className="lg:col-span-5 space-y-6 border-b lg:border-b-0 lg:border-r border-white/5 pb-6 lg:pb-0 lg:pr-6">
@@ -309,6 +316,7 @@ export const BrewingGuides: React.FC = () => {
 
         </div>
       </div>
+      </ScrollReveal>
 
     </section>
   );

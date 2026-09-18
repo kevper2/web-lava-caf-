@@ -78,4 +78,26 @@
   animation-play-state: paused;
 }
 
+/* Contained modal scrollbar - shorter track safely inside rounded borders */
+.modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3d3226 transparent;
+}
+.modal-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a3025;
+  border-radius: 9999px;
+}
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d49a55;
+}
+
+
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Order, OrderStatus } from '../types';
 import { Truck, CheckCircle2, Flame, Package, MapPin, MessageCircle, Bell } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
 
 interface DeliveryTrackerProps {
   orders: Order[];
@@ -68,9 +68,7 @@ export const DeliveryTracker: React.FC<DeliveryTrackerProps> = ({
     if (!selectedOrder) return;
     onSimulateNotification(selectedOrder.id);
     setActiveAlert(`[WhatsApp LAVA]: Tu pedido #${selectedOrder.id} actualizó su estado a "${selectedOrder.status.replace('_', ' ').toUpperCase()}". Despachado desde San Martín de los Andes.`);
-    try {
-      confetti({ particleCount: 30, spread: 60 });
-    } catch (e) {}
+    triggerCoffeeBeanConfetti({ x: 0.5, y: 0.5 });
     setTimeout(() => setActiveAlert(null), 4500);
   };
 

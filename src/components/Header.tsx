@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LavaLogo } from './LavaLogo';
 import { RollingBanner } from './RollingBanner';
 import { CartItem, LoyaltyProfile } from '../types';
-import { ShoppingBag, MessageCircle, Menu, X } from 'lucide-react';
+import { ShoppingBag, Sparkles, Menu, X, Instagram } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: 'home' | 'catalog' | 'club' | 'guides' | 'crm';
@@ -10,6 +10,7 @@ interface HeaderProps {
   cartItems: CartItem[];
   setIsCartOpen: (open: boolean) => void;
   setIsQuizOpen: (open: boolean) => void;
+  onOpenCustomizer: () => void;
   loyaltyProfile: LoyaltyProfile | null;
 }
 
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   cartItems,
   setIsCartOpen,
   setIsQuizOpen,
+  onOpenCustomizer,
   loyaltyProfile,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -51,23 +53,25 @@ export const Header: React.FC<HeaderProps> = ({
       <div
         className={`transition-all duration-300 ${
           isScrolled
-            ? 'bg-black/95 backdrop-blur-lg border-b border-white/5 py-2.5 shadow-2xl'
+            ? 'bg-black/95 backdrop-blur-lg py-2.5 shadow-2xl'
             : 'bg-gradient-to-b from-black/90 via-black/70 to-transparent py-3 sm:py-3.5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex items-center justify-between relative min-h-[44px]">
           
-          {/* Brand Logo */}
-          <button
-            onClick={() => setActiveTab('home')}
-            className="cursor-pointer transition-opacity hover:opacity-90 flex items-center py-1"
-            title="LAVA - San Martín de los Andes"
-          >
-            <LavaLogo size="md" />
-          </button>
+          {/* Brand Logo (Left) */}
+          <div className="flex items-center flex-1 justify-start">
+            <button
+              onClick={() => setActiveTab('home')}
+              className="cursor-pointer transition-opacity hover:opacity-90 flex items-center py-1"
+              title="LAVA - San Martín de los Andes"
+            >
+              <LavaLogo size="md" />
+            </button>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
+          {/* Desktop Navigation (Centered with the Web Page) */}
+          <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             {navLinks.map((link) => (
               <button
                 key={link.id}
@@ -83,19 +87,29 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </nav>
 
-          {/* Right actions: WhatsApp Contact & Cart Trigger */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
+          {/* Right actions: Pedí tu café, Instagram & Cart Trigger */}
+          <div className="flex items-center justify-end flex-1 gap-2 sm:gap-3">
             
-            {/* Direct WhatsApp Barista */}
+            {/* Pedí tu café Customizer Trigger */}
+            <button
+              onClick={onOpenCustomizer}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#d49a55]/40 bg-[#d49a55]/15 hover:bg-[#d49a55]/25 text-[#d49a55] hover:text-white transition-all cursor-pointer text-[11px] font-semibold"
+              title="Personalizá y pedí tu café"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#d49a55]" />
+              <span>Pedí tu café</span>
+            </button>
+
+            {/* Instagram Link - Between Pedí tu café and Cart */}
             <a
-              href="https://wa.me/5491131476953?text=Hola%20Lava!%20Busco%20un%20rico%20caf%C3%A9%20para%20disfrutar%20mis%20d%C3%ADas%20en%20la%20monta%C3%B1a"
+              href="https://www.instagram.com/lavacafe.patagonia/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#2d6335]/70 bg-[#1b3820]/80 hover:bg-[#234b2a] text-[#4ade80] hover:text-white transition-all cursor-pointer text-[11px] font-semibold"
-              title="Chatear por WhatsApp"
+              className="p-2 rounded-full text-[#cfc5b8] hover:text-[#E1306C] transition-colors cursor-pointer hover:bg-white/5"
+              title="Instagram: @lavacafe.patagonia"
+              aria-label="Instagram"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#4ade80]" />
-              <span className="hidden sm:inline">WhatsApp</span>
+              <Instagram className="w-4 h-4" />
             </a>
 
             {/* Cart Trigger */}
@@ -145,15 +159,26 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </div>
 
-          <div className="pt-3 border-t border-white/10">
+          <div className="pt-3 border-t border-white/10 space-y-2.5">
+            <button
+              onClick={() => {
+                onOpenCustomizer();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-[#d49a55]/20 border border-[#d49a55]/50 text-[#d49a55] hover:bg-[#d49a55] hover:text-black text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-[#d49a55]" />
+              <span>Pedí tu café</span>
+            </button>
+
             <a
-              href="https://wa.me/5491131476953?text=Hola%20Lava!%20Busco%20un%20rico%20caf%C3%A9%20para%20disfrutar%20mis%20d%C3%ADas%20en%20la%20monta%C3%B1a"
+              href="https://www.instagram.com/lavacafe.patagonia/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 px-4 rounded-xl bg-[#1b3820] border border-[#2d6335] text-[#4ade80] hover:text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl border border-white/10 hover:border-[#E1306C]/50 text-[#cfc5b8] hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Consultar por WhatsApp</span>
+              <Instagram className="w-4 h-4 text-[#E1306C]" />
+              <span>Instagram @lavacafe.patagonia</span>
             </a>
           </div>
         </div>

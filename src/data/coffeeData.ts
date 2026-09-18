@@ -141,7 +141,7 @@ export const DEMO_CLIENTS: LoyaltyProfile[] = [
   {
     id: 'CLI-001',
     customerName: 'Santiago Villar',
-    phone: '+54 9 11 3147-6953',
+    phone: '+54 9 2972 54-4894',
     email: 'santiago.villar@patagoniaprive.com',
     tier: 'Socio Magma',
     points: 840,
@@ -256,7 +256,7 @@ export const INITIAL_SUBSCRIPTIONS: Subscription[] = [
     pricePerCycle: 23375, // 15% VIP discount
     discountPercentage: 15,
     customerName: 'Santiago Villar',
-    phone: '+54 9 11 3147-6953',
+    phone: '+54 9 2972 54-4894',
     address: 'Barrio Las Pendientes, San Martín de los Andes',
   },
 ];
@@ -266,7 +266,7 @@ export const INITIAL_ORDERS: Order[] = [
     id: 'LAV-9812',
     date: '2026-08-28',
     customerName: 'Santiago Villar',
-    phone: '+54 9 11 3147-6953',
+    phone: '+54 9 2972 54-4894',
     email: 'santiago.villar@patagoniaprive.com',
     address: 'Barrio Las Pendientes',
     city: 'San Martín de los Andes',
@@ -296,7 +296,7 @@ export const INITIAL_ORDERS: Order[] = [
     id: 'LAV-9420',
     date: '2026-08-14',
     customerName: 'Santiago Villar',
-    phone: '+54 9 11 3147-6953',
+    phone: '+54 9 2972 54-4894',
     email: 'santiago.villar@patagoniaprive.com',
     address: 'Barrio Las Pendientes',
     city: 'San Martín de los Andes',

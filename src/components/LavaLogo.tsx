@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface LavaLogoProps {
   className?: string;
@@ -13,6 +13,8 @@ export const LavaLogo: React.FC<LavaLogoProps> = ({
   imgClassName = '',
   src,
 }) => {
+  const [loaded, setLoaded] = useState(false);
+
   // Dimension classes for the logo
   const sizeClasses = {
     xs: 'h-5 sm:h-6',
@@ -31,11 +33,17 @@ export const LavaLogo: React.FC<LavaLogoProps> = ({
     <div className={`inline-flex items-center select-none ${className}`}>
       <img
         src={logoSrc}
-        alt="LAVA"
-        className={`w-auto object-contain transition-all duration-300 drop-shadow-[0_2px_14px_rgba(212,154,85,0.18)] ${sizeClasses[size]} ${imgClassName}`}
-        referrerPolicy="no-referrer"
+        alt="LAVA Café de Montaña"
+        fetchPriority="high"
+        decoding="async"
         loading="eager"
+        onLoad={() => setLoaded(true)}
+        className={`w-auto object-contain drop-shadow-[0_2px_14px_rgba(212,154,85,0.18)] transition-all duration-700 ease-out ${
+          loaded ? 'opacity-100 scale-100 blur-0' : 'opacity-90 scale-[0.98]'
+        } ${sizeClasses[size]} ${imgClassName}`}
+        referrerPolicy="no-referrer"
       />
     </div>
   );
 };
+

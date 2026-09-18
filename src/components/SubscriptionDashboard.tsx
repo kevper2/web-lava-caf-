@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Subscription, CoffeeBean, GrindType, BagSize } from '../types';
 import { COFFEE_BEANS } from '../data/coffeeData';
 import { RefreshCw, Pause, Play, Trash2, Calendar, Sparkles, Check, Edit3, Plus, ShieldCheck, Truck } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
 
 interface SubscriptionDashboardProps {
   subscriptions: Subscription[];
@@ -72,7 +72,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
     );
     setEditingSubId(null);
     showToast('Preferencias actualizadas');
-    confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
+    triggerCoffeeBeanConfetti({ y: 0.7 });
   };
 
   return (

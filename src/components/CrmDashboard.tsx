@@ -248,7 +248,7 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
       id: `LAV-${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
       customerName: 'Martina Rossi',
-      phone: '+54 9 11 3147-6953',
+      phone: '+54 9 2972 54-4894',
       email: 'martina.rossi@ejemplo.com',
       address: 'Av. San Martín 850',
       city: 'San Martín de los Andes',
@@ -1121,7 +1121,7 @@ export const CrmDashboard: React.FC<CrmDashboardProps> = ({
                   type="tel"
                   value={newClientPhone}
                   onChange={(e) => setNewClientPhone(e.target.value)}
-                  placeholder="+54 9 11 3147-6953"
+                  placeholder="+54 9 2972 54-4894"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-white/10 text-white text-xs focus:outline-none focus:border-[#d49a55]"
                   required
                 />

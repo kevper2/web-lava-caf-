@@ -149,6 +149,21 @@ export function App() {
     setIsCheckoutOpen(true);
   };
 
+  const handleOrderPackMagma = () => {
+    const packItem: CartItem = {
+      id: `pack-magma-${Date.now()}`,
+      beanId: 'pack-magma',
+      beanName: 'Pack Magma Degustación · 3 Estilos (3 x 250g en Granos)',
+      grind: 'Granos',
+      size: '250g',
+      unitPrice: 51300,
+      quantity: 1,
+      frequency: 'one_time',
+    };
+    setDirectCheckoutItem(packItem);
+    setIsCheckoutOpen(true);
+  };
+
   const handleOrderCreated = (newOrder: Order) => {
     setOrders((prev) => [newOrder, ...prev]);
     setCartItems([]);
@@ -211,6 +226,7 @@ export function App() {
         cartItems={cartItems}
         setIsCartOpen={setIsCartOpen}
         setIsQuizOpen={setIsQuizOpen}
+        onOpenCustomizer={() => handleOpenCustomizer(COFFEE_BEANS[0])}
         loyaltyProfile={loyaltyProfile}
       />
 
@@ -221,12 +237,28 @@ export function App() {
           <>
             <HeroSection
               onExploreClick={() => {
-                setActiveTab('catalog');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                const catalogEl = document.getElementById('catalog');
+                if (catalogEl) {
+                  catalogEl.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  setActiveTab('catalog');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
               }}
               onQuizClick={() => setIsQuizOpen(true)}
             />
             <BrandStory />
+            <div className="border-t border-white/5">
+              <CoffeeStickersShowcase
+                beans={COFFEE_BEANS}
+                onSelectBeanToCustomize={(bean) => handleOpenCustomizer(bean)}
+                onDirectWhatsAppOrder={handleDirectWhatsAppOrder}
+                onDirectWhatsApp={handleDirectCheckoutFromCustomizer}
+                onOrderPackMagma={handleOrderPackMagma}
+                onAddToCart={handleAddToCart}
+                onOpenQuiz={() => setIsQuizOpen(true)}
+              />
+            </div>
           </>
         )}
 
@@ -237,6 +269,8 @@ export function App() {
               beans={COFFEE_BEANS}
               onSelectBeanToCustomize={(bean) => handleOpenCustomizer(bean)}
               onDirectWhatsAppOrder={handleDirectWhatsAppOrder}
+              onDirectWhatsApp={handleDirectCheckoutFromCustomizer}
+              onOrderPackMagma={handleOrderPackMagma}
               onAddToCart={handleAddToCart}
               onOpenQuiz={() => setIsQuizOpen(true)}
             />

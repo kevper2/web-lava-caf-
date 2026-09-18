@@ -3,6 +3,8 @@ import { CoffeeBean, GrindType, BagSize, CartItem } from '../types';
 import { COFFEE_BEANS } from '../data/coffeeData';
 import { LavaLogo } from './LavaLogo';
 import { Sparkles, MessageCircle, SlidersHorizontal, Check, ShieldCheck, ArrowRight } from 'lucide-react';
+import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
+import { ScrollReveal } from './ScrollReveal';
 
 interface CoffeeStickersShowcaseProps {
   beans?: CoffeeBean[];
@@ -11,6 +13,7 @@ interface CoffeeStickersShowcaseProps {
   onAddToCart: (item: CartItem | CoffeeBean, grind?: GrindType, size?: BagSize) => void;
   onDirectWhatsApp?: (item: CartItem) => void;
   onDirectWhatsAppOrder?: (bean: CoffeeBean, grind: GrindType, size: BagSize) => void;
+  onOrderPackMagma?: () => void;
   onOpenQuiz?: () => void;
 }
 
@@ -21,15 +24,16 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   onAddToCart,
   onDirectWhatsApp,
   onDirectWhatsAppOrder,
+  onOrderPackMagma,
   onOpenQuiz,
 }) => {
   const displayBeans = beans && beans.length > 0 ? beans : COFFEE_BEANS;
 
-  // State for user selections on each card
+  // State for user selections on each card - Default 250g as requested
   const [selectedSizes, setSelectedSizes] = useState<Record<string, BagSize>>({
-    'andes-colombianos': '500g',
-    'serra-da-mantiqueira': '500g',
-    'alpi-italiane': '500g',
+    'andes-colombianos': '250g',
+    'serra-da-mantiqueira': '250g',
+    'alpi-italiane': '250g',
   });
 
   const [selectedGrinds, setSelectedGrinds] = useState<Record<string, GrindType>>({
@@ -52,7 +56,7 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   };
 
   const handleQuickAdd = (bean: CoffeeBean) => {
-    const size = selectedSizes[bean.id] || '500g';
+    const size = selectedSizes[bean.id] || '250g';
     const grind = selectedGrinds[bean.id] || 'Granos';
     const unitPrice = bean.prices[size];
 
@@ -68,12 +72,13 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
     };
 
     onAddToCart(cartItem, grind, size);
+    triggerCoffeeBeanConfetti();
     setAddedAnimation(bean.id);
     setTimeout(() => setAddedAnimation(null), 1800);
   };
 
   const handleQuickWhatsApp = (bean: CoffeeBean) => {
-    const size = selectedSizes[bean.id] || '500g';
+    const size = selectedSizes[bean.id] || '250g';
     const grind = selectedGrinds[bean.id] || 'Granos';
     const unitPrice = bean.prices[size];
 
@@ -107,10 +112,14 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   };
 
   const handleOrderPackMagma = () => {
+    if (onOrderPackMagma) {
+      onOrderPackMagma();
+      return;
+    }
     const packItem: CartItem = {
       id: `pack-magma-${Date.now()}`,
       beanId: 'pack-magma',
-      beanName: 'Pack Magma · Degustación 3x250g',
+      beanName: 'Pack Magma Degustación · 3 Estilos (3 x 250g en Granos)',
       grind: 'Granos',
       size: '250g',
       unitPrice: 51300,
@@ -123,79 +132,87 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   };
 
   return (
-    <section id="catalog" className="py-20 sm:py-28 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
+    <section id="catalog" className="py-12 sm:py-16 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
       
       {/* Section Header - Following BrewingGuides spacing & structure */}
-      <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold">
-          <span>Colección Permanente · 3 Estilos</span>
-        </div>
-
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#f7eedf] tracking-tight">
-          Los 3 Estilos de Montaña
-        </h2>
-
-        <p className="text-sm text-[#8c8276] leading-relaxed">
-          Tres estilos de café curados meticulosamente. Cada perfil expresa una personalidad sensorial única para elevar tu ritual diario.
-        </p>
-
-        {/* Link to Personality Quiz */}
-        {onOpenQuiz && (
-          <div className="pt-2">
-            <button
-              onClick={onOpenQuiz}
-              className="inline-flex items-center gap-2 text-xs sm:text-sm text-[#d49a55] hover:text-[#e5a85b] transition-colors cursor-pointer group underline underline-offset-4 font-medium"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>¿No sabés cuál elegir? Hacé el Test de Personalidad de Café</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </button>
+      <ScrollReveal>
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-8">
+          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[#d49a55] font-semibold">
+            <span>Colección Permanente · 3 Estilos</span>
           </div>
-        )}
-      </div>
 
-      {/* Featured Pack Magma Degustación Banner */}
-      <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#120e09] via-[#1a140d] to-[#120e09] border border-[#d49a55]/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
-        <div className="space-y-2 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#d49a55]/15 border border-[#d49a55]/30 text-[#d49a55] text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-[#d49a55]" />
-            <span>Pack Magma Degustación · Oferta Exclusiva en Granos</span>
-          </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-[#f7eedf]">
-            Los 3 Paquetes de 250g en Granos con 10% OFF
-          </h3>
-          <p className="text-xs sm:text-sm text-[#a89d8f] max-w-xl leading-relaxed">
-            Una degustación completa en grano entero para recorrer los 3 orígenes: <span className="text-[#f7eedf] font-medium">Serra da Mantiqueira</span>, <span className="text-[#f7eedf] font-medium">Alpi Italiane</span> y <span className="text-[#f7eedf] font-medium">Andes Colombianos</span>. 750g totales (3 x 250g en granos) con envío sin cargo en SMA.
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#f7eedf] tracking-tight">
+            Los 3 Estilos de Montaña
+          </h2>
+
+          <p className="text-sm text-[#8c8276] leading-relaxed space-y-0.5">
+            <span className="block">Tres estilos de café curados meticulosamente.</span>
+            <span className="block">Cada perfil expresa una personalidad sensorial única para elevar tu ritual diario.</span>
           </p>
-          <div className="flex items-baseline gap-3 pt-1 justify-center md:justify-start">
-            <span className="text-2xl font-extrabold text-[#f7eedf]">$51.300 ARS</span>
-            <span className="text-sm text-[#7d7367] line-through">$57.000</span>
-            <span className="text-xs text-emerald-400 font-semibold">(Ahorrás $5.700 · 10% OFF)</span>
-          </div>
-        </div>
 
-        <button
-          onClick={handleOrderPackMagma}
-          className="shrink-0 px-6 py-3.5 rounded-2xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335] text-[#4ade80] hover:text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 shadow-xl shadow-black/50"
-        >
-          <MessageCircle className="w-4 h-4 text-[#4ade80]" />
-          <span>Pedir Pack en Granos ($51.300)</span>
-        </button>
-      </div>
+          {/* Link to Personality Quiz */}
+          {onOpenQuiz && (
+            <div className="pt-1">
+              <button
+                onClick={onOpenQuiz}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm text-[#d49a55] hover:text-[#e5a85b] transition-colors cursor-pointer group underline underline-offset-4 font-medium"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>¿No sabés cuál elegir? Hacé el Test de Personalidad de Café</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          )}
+        </div>
+      </ScrollReveal>
+
+      {/* Featured Pack Magma Degustación Banner - Tailored width adjusting to text */}
+      <ScrollReveal delay={0.1}>
+        <div className="max-w-2xl mx-auto mb-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#120e09] via-[#1a140d] to-[#120e09] border border-[#d49a55]/30 flex flex-col items-center text-center justify-center gap-5 shadow-2xl">
+          <div className="space-y-3 text-center max-w-xl flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#d49a55]/15 border border-[#d49a55]/30 text-[#d49a55] text-xs font-semibold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-[#d49a55]" />
+              <span>Pack Magma Degustación · Oferta Exclusiva en Granos</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-[#f7eedf]">
+              Los 3 Paquetes de 250g en Granos con 10% OFF
+            </h3>
+            <p className="text-sm sm:text-base text-[#a89d8f] leading-relaxed text-center space-y-1">
+              <span className="block">Una degustación completa en grano entero para recorrer los 3 estilos:</span>
+              <span className="block text-[#f7eedf] font-medium">Serra da Mantiqueira, Alpi Italiane y Andes Colombianos.</span>
+              <span className="block text-xs sm:text-sm text-[#8c8276] mt-0.5">750g totales (3 x 250g en granos) con envío sin cargo en SMA.</span>
+            </p>
+            <div className="flex items-baseline gap-3 pt-1 justify-center">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#f7eedf]">$51.300 ARS</span>
+              <span className="text-sm text-[#7d7367] line-through">$57.000</span>
+              <span className="text-xs text-[#25D366] font-semibold">(Ahorrás $5.700 · 10% OFF)</span>
+            </div>
+          </div>
+
+          <button
+            id="btn-order-pack-magma"
+            onClick={handleOrderPackMagma}
+            className="shrink-0 px-8 py-3.5 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 shadow-xl shadow-black/50 active:scale-95"
+          >
+            <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-black" />
+            <span>Pedir Pack en Granos ($51.300)</span>
+          </button>
+        </div>
+      </ScrollReveal>
 
       {/* 3 Coffee Style Cards - Structured like a double-entry table with aligned horizontal rows */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-8 items-stretch">
-        {displayBeans.map((bean) => {
-          const currentSize = selectedSizes[bean.id] || '500g';
+        {displayBeans.map((bean, idx) => {
+          const currentSize = selectedSizes[bean.id] || '250g';
           const currentGrind = selectedGrinds[bean.id] || 'Granos';
           const currentPrice = bean.prices[currentSize];
           const isAdded = addedAnimation === bean.id;
 
           return (
-            <div
-              key={bean.id}
-              className="group relative flex flex-col justify-between rounded-3xl bg-[#080808] border border-white/[0.08] hover:border-[#d49a55]/40 transition-all duration-500 p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.8)] hover:shadow-[0_10px_40px_rgba(212,154,85,0.08)] h-full"
-            >
+            <ScrollReveal key={bean.id} delay={0.1 * (idx + 1)} className="h-full flex flex-col">
+              <div
+                className="group relative flex flex-col justify-between rounded-3xl bg-[#080808] border border-white/[0.08] hover:border-[#d49a55]/40 transition-all duration-500 p-6 sm:p-8 shadow-[0_4px_30px_rgba(0,0,0,0.8)] hover:shadow-[0_10px_40px_rgba(212,154,85,0.08)] h-full"
+              >
               {/* Subtle top ember glow on hover */}
               <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-[#d49a55]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -222,12 +239,12 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   )}
                 </div>
 
-                {/* 2. ROW 2: Tasting Notes Tags - Clean full-tag rendering with leveled height */}
-                <div className="py-4 border-b border-white/5 min-h-[102px] flex flex-col justify-center space-y-2">
-                  <span className="text-[10px] uppercase tracking-widest text-[#7d7367] font-semibold block">
+                {/* 2. ROW 2: Tasting Notes Tags - Centered */}
+                <div className="py-4 border-b border-white/5 min-h-[102px] flex flex-col items-center justify-center space-y-2 text-center">
+                  <span className="text-[10px] uppercase tracking-widest text-[#7d7367] font-semibold block text-center">
                     Notas de Cata
                   </span>
-                  <div className="flex flex-wrap gap-1.5 items-center">
+                  <div className="flex flex-wrap gap-1.5 items-center justify-center">
                     {bean.flavorTags.map((tag, idx) => (
                       <span
                         key={idx}
@@ -288,15 +305,15 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </div>
                 </div>
 
-                {/* 4. Representation / Cómo se representa en el café - Full text, no truncation */}
-                <div className="my-4 min-h-[110px]">
+                {/* 4. Representation / Cómo se representa en el café - Centered, fitted to text, no gap */}
+                <div className="my-3 flex justify-center w-full">
                   {bean.representation && (
-                    <div className="h-full p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col justify-between">
-                      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#d49a55] font-semibold shrink-0 mb-1">
+                    <div className="w-full p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#d49a55] font-semibold shrink-0">
                         <Sparkles className="w-3 h-3 text-[#d49a55]" />
                         <span>Cómo se representa en el café</span>
                       </div>
-                      <p className="text-xs text-[#c9bba8] leading-relaxed italic">
+                      <p className="text-xs text-[#c9bba8] leading-relaxed italic text-center">
                         {bean.representation}
                       </p>
                     </div>
@@ -363,12 +380,12 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   </div>
                 </div>
 
-                {/* Primary CTA: WhatsApp Direct Checkout */}
+                {/* Primary CTA: WhatsApp Direct Checkout - Unified Green */}
                 <button
                   onClick={() => handleQuickWhatsApp(bean)}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-[#1b3820] hover:bg-[#234b2a] border border-[#2d6335]/60 text-[#4ade80] hover:text-white font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all duration-300 cursor-pointer shadow-lg shadow-black/40"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all duration-300 cursor-pointer shadow-lg shadow-black/40"
                 >
-                  <MessageCircle className="w-4 h-4 text-[#4ade80]" />
+                  <MessageCircle className="w-4 h-4" />
                   <span>Pedir directo por WhatsApp</span>
                 </button>
 
@@ -403,8 +420,9 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
               </div>
 
             </div>
-          );
-        })}
+          </ScrollReveal>
+        );
+      })}
       </div>
 
     </section>

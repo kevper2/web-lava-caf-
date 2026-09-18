@@ -115,7 +115,7 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
       <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-[#0a0a0a] border border-white/10 shadow-2xl text-left overflow-hidden">
         
         {/* Pinned Header: Always visible X button and Logo */}
-        <div className="flex items-center justify-between px-6 sm:px-10 py-4 border-b border-white/10 bg-[#0a0a0a]/95 backdrop-blur-md shrink-0 z-20">
+        <div className="flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4 border-b border-white/10 bg-[#0a0a0a]/95 backdrop-blur-md shrink-0 z-20">
           <div className="flex items-center gap-3">
             <LavaLogo size="sm" />
             <span className="text-[11px] uppercase tracking-wider text-[#d49a55] font-semibold hidden sm:inline">
@@ -124,7 +124,7 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-[#8c8276] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-full text-[#8c8276] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Cerrar modal (Esc)"
             title="Cerrar (Esc)"
           >
@@ -133,10 +133,10 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
         </div>
 
         {/* Scrollable Body with contained custom scrollbar */}
-        <div className="overflow-y-auto modal-scrollbar p-6 sm:p-10 space-y-6 flex-1">
+        <div className="overflow-y-auto modal-scrollbar p-4 sm:p-8 space-y-5 sm:space-y-6 flex-1">
 
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-[#f7eedf] tracking-tight">
+            <h3 className="text-lg sm:text-2xl font-bold text-[#f7eedf] tracking-tight">
               Personalizador de Molienda & Estilo de Café
             </h3>
             <p className="text-xs text-[#8c8276] mt-1">
@@ -144,26 +144,46 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
             </p>
           </div>
 
-          <div className="space-y-6 pt-2">
+          <div className="space-y-5 sm:space-y-6 pt-1">
             
             {/* Style selector */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
                 1. Seleccionar Estilo de Café
               </label>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
                 {COFFEE_BEANS.map((b) => (
                   <button
                     key={b.id}
                     onClick={() => setSelectedBeanId(b.id)}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                    className={`p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer flex sm:flex-col justify-between items-center sm:items-start ${
                       selectedBeanId === b.id
                         ? 'bg-white/10 border-[#d49a55] text-white shadow-lg'
-                        : 'bg-[#111111] border-white/5 text-[#8c8276] hover:text-white'
+                        : 'bg-[#111111] border-white/5 text-[#8c8276] hover:text-white hover:border-white/15'
                     }`}
                   >
-                    <div className="text-xs font-bold">{b.name}</div>
-                    <div className="text-[10px] text-[#a99c8d]">{b.personality.title}</div>
+                    <div className="min-w-0 pr-2 sm:pr-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs sm:text-sm font-bold text-[#f7eedf] leading-snug">
+                          {b.name}
+                        </span>
+                        <span className="text-[10px] text-[#8c8276] font-normal sm:hidden">
+                          ({b.country})
+                        </span>
+                      </div>
+                      <div className="text-[11px] sm:text-[10px] text-[#a99c8d] mt-0.5 leading-snug">
+                        {b.personality.title}
+                      </div>
+                    </div>
+
+                    {/* Mobile selection indicator */}
+                    <div className="sm:hidden shrink-0">
+                      {selectedBeanId === b.id ? (
+                        <Check className="w-4 h-4 text-[#d49a55]" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border border-white/15" />
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -174,12 +194,12 @@ export const BeanCustomizerModal: React.FC<BeanCustomizerModalProps> = ({
               <label className="text-xs font-semibold text-[#8c8276] uppercase tracking-wider block">
                 2. Tamaño de la Bolsa
               </label>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                 {sizeOptions.map((opt) => (
                   <button
                     key={opt.size}
                     onClick={() => setSelectedSize(opt.size)}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                    className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer ${
                       selectedSize === opt.size
                         ? 'bg-white/10 border-[#d49a55] text-white'
                         : 'bg-[#111111] border-white/5 text-[#8c8276] hover:text-white'

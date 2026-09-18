@@ -27,46 +27,46 @@ export const BrandStory: React.FC = () => {
           </div>
         </ScrollReveal>
 
-        {/* 3 Core High-Ticket Pillars - Balanced heights & spacing */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 pt-1">
+        {/* 3 Core High-Ticket Pillars - Centered rectangles and content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 pt-1 max-w-md md:max-w-none mx-auto justify-center">
           
           <ScrollReveal delay={0.1}>
-            <div className="space-y-3 p-6 rounded-2xl bg-white/[0.015] border border-white/5 flex flex-col justify-start h-full">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#d49a55]">
+            <div className="space-y-3 p-6 sm:p-7 rounded-2xl bg-white/[0.015] border border-white/5 flex flex-col items-center text-center justify-start h-full">
+              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#d49a55] mx-auto">
                 <Mountain className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-[#f7eedf] pt-1">
+              <h3 className="text-lg font-bold text-[#f7eedf] pt-1 text-center">
                 Selección de Altura Suprema
               </h3>
-              <p className="text-xs text-[#8c8276] leading-relaxed">
+              <p className="text-xs text-[#8c8276] leading-relaxed text-center max-w-xs mx-auto">
                 Granos seleccionados de las altitudes más representativas del mundo. La delicadeza del grano forja una complejidad aromática superior.
               </p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <div className="space-y-3 p-6 rounded-2xl bg-white/[0.015] border border-white/5 flex flex-col justify-start h-full">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#d49a55]">
+            <div className="space-y-3 p-6 sm:p-7 rounded-2xl bg-white/[0.015] border border-white/5 flex flex-col items-center text-center justify-start h-full">
+              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#d49a55] mx-auto">
                 <Flame className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-[#f7eedf] pt-1">
+              <h3 className="text-lg font-bold text-[#f7eedf] pt-1 text-center">
                 Tueste Magistral
               </h3>
-              <p className="text-xs text-[#8c8276] leading-relaxed">
+              <p className="text-xs text-[#8c8276] leading-relaxed text-center max-w-xs mx-auto">
                 Curvas térmicas para desbloquear la máxima expresión de notas nobles de cada estilo de café: cacao puro, frutos secos y especias cálidas.
               </p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
-            <div className="space-y-3 p-6 rounded-2xl bg-white/[0.015] border border-white/5 flex flex-col justify-start h-full">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#d49a55]">
+            <div className="space-y-3 p-6 sm:p-7 rounded-2xl bg-white/[0.015] border border-white/5 flex flex-col items-center text-center justify-start h-full">
+              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#d49a55] mx-auto">
                 <Award className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-[#f7eedf] pt-1">
+              <h3 className="text-lg font-bold text-[#f7eedf] pt-1 text-center">
                 Atención Directa Barista
               </h3>
-              <p className="text-xs text-[#8c8276] leading-relaxed">
+              <p className="text-xs text-[#8c8276] leading-relaxed text-center max-w-xs mx-auto">
                 Pedidos directos sin intermediarios y atención personalizada vía WhatsApp desde San Martín de los Andes.
               </p>
             </div>

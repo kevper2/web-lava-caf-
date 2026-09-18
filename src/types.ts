@@ -1,5 +1,5 @@
 export type GrindType = 'Granos' | 'Prensa' | 'Filtro' | 'Moka' | 'Espresso';
-export type BagSize = '250g' | '500g' | '1kg';
+export type BagSize = '250g' | '500g' | '1kg' | '3 x 250g (750g)';
 export type Frequency = 'one_time' | 'weekly' | 'biweekly' | 'monthly';
 
 export interface CoffeePersonality {

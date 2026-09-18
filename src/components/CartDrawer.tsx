@@ -91,7 +91,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="font-bold text-sm text-[#f7eedf]">{item.beanName}</h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold text-sm text-[#f7eedf]">{item.beanName}</h4>
+                        {item.beanId === 'pack-magma' && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-[#25D366]/20 border border-[#25D366]/40 text-[#25D366] text-[10px] font-bold">
+                            10% OFF
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-xs text-[#8c8276] mt-0.5">
                         <span>{item.size}</span>
                         <span>·</span>
@@ -137,6 +144,44 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </div>
                 </div>
               ))
+            )}
+
+            {/* Offer Pack Magma Degustación inside CartDrawer */}
+            {cartItems.length > 0 && !cartItems.some((i) => i.beanId === 'pack-magma') && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#17120b] to-[#120e09] border border-[#d49a55]/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#f7eedf] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#d49a55]" />
+                    <span>Pack Magma Degustación</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-[#25D366] bg-[#25D366]/10 px-2 py-0.5 rounded-full border border-[#25D366]/30">
+                    10% OFF
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#a89d8f] leading-relaxed">
+                  Sumá los 3 orígenes en granos (750g totales) por <span className="text-white font-semibold font-mono">$51.300</span> <span className="line-through text-[#6d6459]">$57.000</span>.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const packItem: CartItem = {
+                      id: `pack-magma-${Date.now()}`,
+                      beanId: 'pack-magma',
+                      beanName: 'Pack Magma · Degustación 3 Orígenes (3x250g en Granos)',
+                      grind: 'Granos',
+                      size: '3 x 250g (750g)',
+                      unitPrice: 51300,
+                      quantity: 1,
+                      frequency: 'one_time',
+                    };
+                    setCartItems((prev) => [...prev, packItem]);
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-[#d49a55]/30 text-[11px] font-bold text-[#d49a55] hover:text-[#f7eedf] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5 text-[#d49a55]" />
+                  <span>Sumar Pack Magma al Carrito ($51.300)</span>
+                </button>
+              </div>
             )}
           </div>
 

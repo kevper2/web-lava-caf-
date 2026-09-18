@@ -8,7 +8,8 @@ import {
   Check, 
   Sparkles, 
   MapPin,
-  Mail
+  Mail,
+  Trash2
 } from 'lucide-react';
 import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
 
@@ -23,6 +24,8 @@ interface WhatsAppCheckoutModalProps {
   onOrderCreated: (order: Order) => void;
   directItem?: CartItem | null;
   currentUserProfile?: LoyaltyProfile | null;
+  onUpdateQuantity?: (itemId: string, newQty: number) => void;
+  onRemoveItem?: (itemId: string) => void;
 }
 
 export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
@@ -36,6 +39,8 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
   onOrderCreated,
   directItem,
   currentUserProfile,
+  onUpdateQuantity,
+  onRemoveItem,
 }) => {
   // Form fields - Only prefill if user is logged in
   const [name, setName] = useState(currentUserProfile?.customerName || '');
@@ -95,9 +100,9 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
   const packItemFormatted: CartItem = {
     id: directItem?.id || `pack-magma-${Date.now()}`,
     beanId: 'pack-magma',
-    beanName: 'Pack Magma Degustación · 3 Estilos (3 x 250g en Granos)',
+    beanName: 'Pack Magma · Degustación 3 Orígenes (3x250g en Granos)',
     grind: 'Granos',
-    size: '250g',
+    size: '3 x 250g (750g)',
     unitPrice: 51300,
     quantity: directItem?.quantity || 1,
     frequency: 'one_time',
@@ -111,13 +116,22 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
   const packDiscount = 5700; // 10% OFF
   const packFinalPrice = 51300;
 
-  const currentSubtotal = isPackMagmaDirect
-    ? packRegularPrice * (directItem?.quantity || 1)
-    : (directItem ? directItem.unitPrice * directItem.quantity : subtotal) + (includePackMagma ? packRegularPrice : 0);
+  const isPackMagmaInItems = baseItems.some((i) => i.beanId === 'pack-magma');
+  const shouldAddExtraPack = includePackMagma && !isPackMagmaInItems;
 
-  const currentDiscount = isPackMagmaDirect
-    ? packDiscount * (directItem?.quantity || 1)
-    : (directItem ? 0 : discount) + (includePackMagma ? packDiscount : 0);
+  const currentSubtotal = baseItems.reduce((acc, item) => {
+    if (item.beanId === 'pack-magma') {
+      return acc + packRegularPrice * item.quantity;
+    }
+    return acc + item.unitPrice * item.quantity;
+  }, 0) + (shouldAddExtraPack ? packRegularPrice : 0);
+
+  const currentDiscount = baseItems.reduce((acc, item) => {
+    if (item.beanId === 'pack-magma') {
+      return acc + packDiscount * item.quantity;
+    }
+    return acc;
+  }, 0) + (shouldAddExtraPack ? packDiscount : 0);
 
   const currentShipping = 0;
   const currentTotal = currentSubtotal - currentDiscount + currentShipping;
@@ -139,7 +153,7 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
     return acc + grams * item.quantity;
   }, 0);
 
-  const totalGrams = isPackMagmaDirect ? 750 : baseGrams + (includePackMagma ? 750 : 0);
+  const totalGrams = baseGrams + (shouldAddExtraPack ? 750 : 0);
 
   const handleGenerateWhatsAppOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,15 +194,15 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
 
     const regularLines = baseItems.map((item) => {
       if (item.beanId === 'pack-magma') {
-        return `• *${item.beanName}*
-  - Contenido: 3 x 250g (750g totales en Granos)
+        return `• *${item.beanName}* (x${item.quantity})
+  - Contenido: ${item.quantity * 3} x 250g (${item.quantity * 750}g totales en Granos)
   - Variedades: Serra da Mantiqueira + Alpi Italiane + Andes Colombianos
   - Precio: $${(item.unitPrice * item.quantity).toLocaleString('es-AR')} ARS _(10% OFF aplicado · Regular $${(packRegularPrice * item.quantity).toLocaleString('es-AR')})_`;
       }
       return `• *${item.beanName}* (${item.size} | Molienda ${item.grind}) x${item.quantity} -> $${(item.unitPrice * item.quantity).toLocaleString('es-AR')}`;
     });
 
-    const packLines = (!isPackMagmaDirect && includePackMagma)
+    const packLines = shouldAddExtraPack
       ? [`• *Pack Magma · Degustación 3 Orígenes (En Granos)* (3 x 250g: Serra da Mantiqueira + Alpi Italiane + Andes Colombianos) -> $${packFinalPrice.toLocaleString('es-AR')} ARS (10% OFF aplicado)`]
       : [];
 
@@ -220,13 +234,13 @@ ${discountLine}*Envío en SMA:* ${shippingLine}
 _Enviado desde San Martín de los Andes_`;
 
     const orderItems: CartItem[] = [...baseItems];
-    if (!isPackMagmaDirect && includePackMagma) {
+    if (shouldAddExtraPack) {
       orderItems.push({
         id: `pack-magma-${Date.now()}`,
         beanId: 'pack-magma',
         beanName: 'Pack Magma · Degustación 3x250g en Granos (10% OFF)',
         grind: 'Granos',
-        size: '250g',
+        size: '3 x 250g (750g)',
         unitPrice: packFinalPrice,
         quantity: 1,
         frequency: 'one_time',
@@ -312,54 +326,98 @@ _Enviado desde San Martín de los Andes_`;
           )}
 
           {/* Items Summary Accordion / Preview */}
-          <div className="space-y-2 p-4 rounded-2xl bg-[#121212] border border-white/5">
-            <span className="text-[11px] uppercase tracking-wider text-[#d49a55] font-semibold block">
-              Resumen de Productos:
-            </span>
+          <div className="space-y-2.5 p-4 rounded-2xl bg-[#121212] border border-white/5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] uppercase tracking-wider text-[#d49a55] font-semibold block">
+                Resumen de Productos ({baseItems.reduce((acc, i) => acc + i.quantity, 0) + (shouldAddExtraPack ? 1 : 0)}):
+              </span>
+              <span className="text-[10px] text-[#8c8276]">
+                Ajustá unidades o eliminá con + / -
+              </span>
+            </div>
 
-            <div className="space-y-2 pt-1 max-h-48 overflow-y-auto modal-scrollbar pr-1">
-              {baseItems.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs py-2 border-b border-white/5 last:border-0">
-                  <div className="space-y-0.5 max-w-[72%]">
+            <div className="space-y-2 pt-1 max-h-56 overflow-y-auto modal-scrollbar pr-1">
+              {baseItems.map((item) => (
+                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs py-2.5 border-b border-white/5 last:border-0">
+                  <div className="space-y-0.5 flex-1 min-w-0 pr-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-white block">{item.beanName}</span>
                       {item.beanId === 'pack-magma' && (
                         <span className="px-2 py-0.5 rounded-full bg-[#25D366]/20 border border-[#25D366]/40 text-[#25D366] text-[10px] font-bold">
-                          10% OFF Incluido
+                          10% OFF
                         </span>
                       )}
                     </div>
                     <span className="text-[11px] text-[#8c8276] block leading-relaxed">
                       {item.beanId === 'pack-magma'
-                        ? '3 x 250g (750g totales) en Granos · Serra da Mantiqueira + Alpi Italiane + Andes Colombianos'
-                        : `${item.size} · Molienda ${item.grind} x${item.quantity}`
+                        ? '3 x 250g (750g totales) en Granos · 3 Orígenes'
+                        : `${item.size} · Molienda ${item.grind}`
                       }
                     </span>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="font-mono text-[#d49a55] font-semibold block">
-                      ${(item.unitPrice * item.quantity).toLocaleString('es-AR')}
-                    </span>
-                    {item.beanId === 'pack-magma' && (
-                      <span className="text-[10px] text-[#6d6459] line-through font-mono">
-                        $57.000
+
+                  {/* Quantity controls and price */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                    <div className="flex items-center bg-black/80 border border-white/10 rounded-lg p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (item.quantity <= 1) {
+                            if (onRemoveItem) onRemoveItem(item.id);
+                            else if (onUpdateQuantity) onUpdateQuantity(item.id, 0);
+                          } else {
+                            if (onUpdateQuantity) onUpdateQuantity(item.id, item.quantity - 1);
+                          }
+                        }}
+                        className="w-6 h-6 flex items-center justify-center text-xs text-[#a99c8d] hover:text-white hover:bg-white/10 rounded cursor-pointer transition-colors"
+                        title={item.quantity <= 1 ? "Eliminar del pedido" : "Restar unidad"}
+                      >
+                        {item.quantity <= 1 ? (
+                          <Trash2 className="w-3 h-3 text-rose-400" />
+                        ) : (
+                          <span className="font-bold text-sm leading-none">-</span>
+                        )}
+                      </button>
+                      <span className="w-6 text-center font-bold text-xs text-white font-mono">
+                        {item.quantity}
                       </span>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onUpdateQuantity) onUpdateQuantity(item.id, item.quantity + 1);
+                        }}
+                        className="w-6 h-6 flex items-center justify-center text-xs text-[#a99c8d] hover:text-white hover:bg-white/10 rounded cursor-pointer transition-colors"
+                        title="Sumar unidad"
+                      >
+                        <span className="font-bold text-sm leading-none">+</span>
+                      </button>
+                    </div>
+
+                    <div className="text-right min-w-[70px]">
+                      <span className="font-mono text-[#d49a55] font-semibold block text-xs sm:text-sm">
+                        ${(item.unitPrice * item.quantity).toLocaleString('es-AR')}
+                      </span>
+                      {item.beanId === 'pack-magma' && (
+                        <span className="text-[10px] text-[#6d6459] line-through font-mono block">
+                          ${(packRegularPrice * item.quantity).toLocaleString('es-AR')}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
 
-              {baseItems.length === 0 && !includePackMagma && (
-                <div className="text-xs text-[#8c8276] py-2">
-                  No hay cafés seleccionados. Podés sumar el Pack Magma degustación abajo.
+              {baseItems.length === 0 && !shouldAddExtraPack && (
+                <div className="text-xs text-[#8c8276] py-4 text-center bg-black/40 rounded-xl border border-dashed border-white/10">
+                  El carrito está vacío. Podés sumar el Pack Magma degustación abajo o volver al catálogo para elegir cafés.
                 </div>
               )}
             </div>
 
-            {/* Pack Magma degustación checkbox option - Solo visible si no es orden directa del Pack Magma */}
-            {!isPackMagmaDirect && (
+            {/* Pack Magma degustación checkbox option - Solo visible si no está ya en el carrito */}
+            {!isPackMagmaInItems && (
               <div className="pt-3 border-t border-white/5">
-                <label className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-[#17120b] to-[#120e09] border border-[#d49a55]/30 cursor-pointer select-none">
+                <label className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-[#17120b] to-[#120e09] border border-[#d49a55]/30 cursor-pointer select-none hover:border-[#d49a55]/60 transition-colors">
                   <input
                     type="checkbox"
                     checked={includePackMagma}
@@ -651,11 +709,22 @@ _Enviado desde San Martín de los Andes_`;
             <div className="pt-4 space-y-3">
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 px-6 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-xl shadow-black/50"
+                disabled={isSubmitting || (baseItems.length === 0 && !shouldAddExtraPack)}
+                className={`w-full py-4 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-xl shadow-black/50 ${
+                  baseItems.length === 0 && !shouldAddExtraPack
+                    ? 'bg-white/5 text-[#6d6459] border border-white/10 cursor-not-allowed'
+                    : 'bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black cursor-pointer active:scale-95'
+                }`}
               >
                 <MessageCircle className="w-5 h-5" />
-                <span>{isSubmitting ? 'Abriendo WhatsApp...' : 'Confirmar Pedido por WhatsApp'}</span>
+                <span>
+                  {isSubmitting
+                    ? 'Abriendo WhatsApp...'
+                    : baseItems.length === 0 && !shouldAddExtraPack
+                    ? 'Seleccioná al menos 1 café'
+                    : 'Confirmar Pedido por WhatsApp'
+                  }
+                </span>
               </button>
               <p className="text-center text-[10px] text-[#7d7367]">
                 Se abrirá un chat directo con el equipo LAVA en San Martín de los Andes para coordinar entrega.

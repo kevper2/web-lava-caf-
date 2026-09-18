@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CoffeeBean, GrindType, BagSize, CartItem } from '../types';
 import { COFFEE_BEANS } from '../data/coffeeData';
 import { LavaLogo } from './LavaLogo';
-import { Sparkles, MessageCircle, SlidersHorizontal, Check, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Sparkles, MessageCircle, SlidersHorizontal, Check, ShieldCheck, ArrowRight, ChevronDown, ShoppingBag } from 'lucide-react';
 import { triggerCoffeeBeanConfetti } from '../utils/coffeeConfetti';
 import { ScrollReveal } from './ScrollReveal';
 
@@ -29,6 +29,16 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
 }) => {
   const displayBeans = beans && beans.length > 0 ? beans : COFFEE_BEANS;
 
+  // State for collapsible tasting notes on mobile
+  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
+
+  const toggleNotes = (beanId: string) => {
+    setExpandedNotes((prev) => ({
+      ...prev,
+      [beanId]: !prev[beanId],
+    }));
+  };
+
   // State for user selections on each card - Default 250g as requested
   const [selectedSizes, setSelectedSizes] = useState<Record<string, BagSize>>({
     'andes-colombianos': '250g',
@@ -43,9 +53,28 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   });
 
   const [addedAnimation, setAddedAnimation] = useState<string | null>(null);
+  const [magmaAddedAnimation, setMagmaAddedAnimation] = useState(false);
 
   const grindOptions: GrindType[] = ['Granos', 'Filtro', 'Espresso', 'Moka', 'Prensa'];
   const sizeOptions: BagSize[] = ['250g', '500g', '1kg'];
+
+  const handleAddPackMagmaToCart = () => {
+    const packItem: CartItem = {
+      id: `pack-magma-${Date.now()}`,
+      beanId: 'pack-magma',
+      beanName: 'Pack Magma · Degustación 3 Orígenes (3x250g en Granos)',
+      grind: 'Granos',
+      size: '3 x 250g (750g)',
+      unitPrice: 51300,
+      quantity: 1,
+      frequency: 'one_time',
+    };
+
+    onAddToCart(packItem, 'Granos', '250g');
+    triggerCoffeeBeanConfetti();
+    setMagmaAddedAnimation(true);
+    setTimeout(() => setMagmaAddedAnimation(false), 2200);
+  };
 
   const handleSizeChange = (beanId: string, size: BagSize) => {
     setSelectedSizes((prev) => ({ ...prev, [beanId]: size }));
@@ -132,7 +161,7 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
   };
 
   return (
-    <section id="catalog" className="py-12 sm:py-16 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
+    <section id="catalog" className="scroll-mt-24 sm:scroll-mt-28 lg:scroll-mt-32 py-12 sm:py-16 px-6 sm:px-10 lg:px-12 max-w-7xl mx-auto bg-black">
       
       {/* Section Header - Following BrewingGuides spacing & structure */}
       <ScrollReveal>
@@ -189,14 +218,38 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
             </div>
           </div>
 
-          <button
-            id="btn-order-pack-magma"
-            onClick={handleOrderPackMagma}
-            className="shrink-0 px-8 py-3.5 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 shadow-xl shadow-black/50 active:scale-95"
-          >
-            <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-black" />
-            <span>Pedir Pack en Granos ($51.300)</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
+            <button
+              id="btn-order-pack-magma"
+              onClick={handleOrderPackMagma}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366] border border-[#25D366]/50 text-[#25D366] hover:text-black font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-black/50 active:scale-95"
+            >
+              <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:text-black" />
+              <span>Pedir directo por WhatsApp ($51.300)</span>
+            </button>
+
+            <button
+              id="btn-add-pack-magma-cart"
+              onClick={handleAddPackMagmaToCart}
+              className={`w-full sm:w-auto px-6 py-3.5 rounded-2xl border text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 ${
+                magmaAddedAnimation
+                  ? 'bg-[#d49a55] text-black border-[#d49a55]'
+                  : 'bg-white/5 hover:bg-white/10 border-white/15 text-[#f7eedf] hover:border-[#d49a55]/50'
+              }`}
+            >
+              {magmaAddedAnimation ? (
+                <>
+                  <Check className="w-4 h-4 text-black" />
+                  <span>¡Pack Agregado al Carrito!</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="w-4 h-4 text-[#d49a55]" />
+                  <span>Sumar Pack al Carrito</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </ScrollReveal>
 
@@ -239,83 +292,183 @@ export const CoffeeStickersShowcase: React.FC<CoffeeStickersShowcaseProps> = ({
                   )}
                 </div>
 
-                {/* 2. ROW 2: Tasting Notes Tags - Centered */}
-                <div className="py-4 border-b border-white/5 min-h-[102px] flex flex-col items-center justify-center space-y-2 text-center">
-                  <span className="text-[10px] uppercase tracking-widest text-[#7d7367] font-semibold block text-center">
-                    Notas de Cata
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 items-center justify-center">
-                    {bean.flavorTags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-[#e0d6c8] font-medium leading-tight whitespace-nowrap"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 3. ROW 3: Sensory Balance Indicators (Tueste, Acidez, Cuerpo) - Leveled height */}
-                <div className="py-5 border-b border-white/5 min-h-[180px] flex flex-col justify-between">
-                  {/* Tueste */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#8c8276]">Tueste:</span>
-                      <span className="text-[#e0d6c8] font-medium">
-                        {bean.roastTitle}{bean.roastDesc ? ` · ${bean.roastDesc}` : ''}
-                      </span>
-                    </div>
-                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#d49a55] h-full rounded-full transition-all duration-700"
-                        style={{ width: `${bean.roastPercentage}%` }}
-                      />
+                {/* 2, 3, 4: DESKTOP ONLY (Always visible & leveled) */}
+                <div className="hidden lg:block">
+                  {/* ROW 2: Tasting Notes Tags */}
+                  <div className="py-4 border-b border-white/5 min-h-[102px] flex flex-col items-center justify-center space-y-2 text-center">
+                    <span className="text-[10px] uppercase tracking-widest text-[#7d7367] font-semibold block text-center">
+                      Notas de Cata
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 items-center justify-center">
+                      {bean.flavorTags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-[#e0d6c8] font-medium leading-tight whitespace-nowrap"
+                        >
+                          {tag}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Acidez */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#8c8276]">Acidez:</span>
-                      <span className="text-[#e0d6c8] font-medium">{bean.acidityTitle}</span>
-                    </div>
-                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#e5a85b] h-full rounded-full transition-all duration-700"
-                        style={{ width: `${bean.acidityPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Cuerpo */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#8c8276]">Cuerpo:</span>
-                      <span className="text-[#e0d6c8] font-medium">
-                        {bean.bodyTitle}{bean.bodyDesc && bean.bodyDesc !== bean.bodyTitle ? ` · ${bean.bodyDesc}` : ''}
-                      </span>
-                    </div>
-                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#c6894b] h-full rounded-full transition-all duration-700"
-                        style={{ width: `${bean.bodyPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. Representation / Cómo se representa en el café - Centered, fitted to text, no gap */}
-                <div className="my-3 flex justify-center w-full">
-                  {bean.representation && (
-                    <div className="w-full p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center space-y-1">
-                      <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#d49a55] font-semibold shrink-0">
-                        <Sparkles className="w-3 h-3 text-[#d49a55]" />
-                        <span>Cómo se representa en el café</span>
+                  {/* ROW 3: Sensory Balance Indicators (Tueste, Acidez, Cuerpo) */}
+                  <div className="py-5 border-b border-white/5 min-h-[180px] flex flex-col justify-between">
+                    {/* Tueste */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-[#8c8276]">Tueste:</span>
+                        <span className="text-[#e0d6c8] font-medium">
+                          {bean.roastTitle}{bean.roastDesc ? ` · ${bean.roastDesc}` : ''}
+                        </span>
                       </div>
-                      <p className="text-xs text-[#c9bba8] leading-relaxed italic text-center">
-                        {bean.representation}
-                      </p>
+                      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="bg-[#d49a55] h-full rounded-full transition-all duration-700"
+                          style={{ width: `${bean.roastPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Acidez */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-[#8c8276]">Acidez:</span>
+                        <span className="text-[#e0d6c8] font-medium">{bean.acidityTitle}</span>
+                      </div>
+                      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="bg-[#e5a85b] h-full rounded-full transition-all duration-700"
+                          style={{ width: `${bean.acidityPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Cuerpo */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-[#8c8276]">Cuerpo:</span>
+                        <span className="text-[#e0d6c8] font-medium">
+                          {bean.bodyTitle}{bean.bodyDesc && bean.bodyDesc !== bean.bodyTitle ? ` · ${bean.bodyDesc}` : ''}
+                        </span>
+                      </div>
+                      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="bg-[#c6894b] h-full rounded-full transition-all duration-700"
+                          style={{ width: `${bean.bodyPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ROW 4: Representation / Cómo se representa en el café */}
+                  <div className="my-3 flex justify-center w-full">
+                    {bean.representation && (
+                      <div className="w-full p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center space-y-1">
+                        <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#d49a55] font-semibold shrink-0">
+                          <Sparkles className="w-3 h-3 text-[#d49a55]" />
+                          <span>Cómo se representa en el café</span>
+                        </div>
+                        <p className="text-xs text-[#c9bba8] leading-relaxed italic text-center">
+                          {bean.representation}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2, 3, 4: MOBILE ONLY COLLAPSIBLE (NOTAS DE CATA button nucleating tags, balance bars & representation) */}
+                <div className="lg:hidden py-3 border-b border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => toggleNotes(bean.id)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-all cursor-pointer group"
+                    aria-expanded={!!expandedNotes[bean.id]}
+                  >
+                    <span className="text-xs uppercase tracking-widest text-[#d49a55] font-bold group-hover:text-white transition-colors">
+                      NOTAS DE CATA
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#d49a55] transition-transform duration-300 ${
+                        expandedNotes[bean.id] ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {expandedNotes[bean.id] && (
+                    <div className="pt-4 pb-2 space-y-4 animate-in fade-in duration-200">
+                      {/* Tasting tags */}
+                      <div className="flex flex-wrap gap-1.5 items-center justify-center">
+                        {bean.flavorTags.map((tag, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-[#e0d6c8] font-medium leading-tight whitespace-nowrap"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Sensory balance bars */}
+                      <div className="space-y-3 pt-2 px-1">
+                        {/* Tueste */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[#8c8276]">Tueste:</span>
+                            <span className="text-[#e0d6c8] font-medium">
+                              {bean.roastTitle}{bean.roastDesc ? ` · ${bean.roastDesc}` : ''}
+                            </span>
+                          </div>
+                          <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-[#d49a55] h-full rounded-full"
+                              style={{ width: `${bean.roastPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Acidez */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[#8c8276]">Acidez:</span>
+                            <span className="text-[#e0d6c8] font-medium">{bean.acidityTitle}</span>
+                          </div>
+                          <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-[#e5a85b] h-full rounded-full"
+                              style={{ width: `${bean.acidityPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Cuerpo */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[#8c8276]">Cuerpo:</span>
+                            <span className="text-[#e0d6c8] font-medium">
+                              {bean.bodyTitle}{bean.bodyDesc && bean.bodyDesc !== bean.bodyTitle ? ` · ${bean.bodyDesc}` : ''}
+                            </span>
+                          </div>
+                          <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-[#c6894b] h-full rounded-full"
+                              style={{ width: `${bean.bodyPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Representation */}
+                      {bean.representation && (
+                        <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col items-center text-center space-y-1">
+                          <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-[#d49a55] font-semibold shrink-0">
+                            <Sparkles className="w-3 h-3 text-[#d49a55]" />
+                            <span>Cómo se representa en el café</span>
+                          </div>
+                          <p className="text-xs text-[#c9bba8] leading-relaxed italic text-center">
+                            {bean.representation}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

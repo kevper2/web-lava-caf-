@@ -110,28 +110,68 @@ export function App() {
     setIsCustomizerOpen(true);
   };
 
-  const handleAddToCart = (beanOrItem: CoffeeBean | CartItem, grind: GrindType = 'Granos', size: BagSize = '500g') => {
-    if ('unitPrice' in beanOrItem) {
-      setCartItems((prev) => [...prev, beanOrItem]);
+  const handleUpdateCartQuantity = (itemId: string, newQty: number) => {
+    if (newQty <= 0) {
+      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
     } else {
-      const newItem: CartItem = {
-        id: `cart-${Date.now()}-${Math.random()}`,
-        beanId: beanOrItem.id,
-        beanName: beanOrItem.name,
-        grind,
-        size,
-        unitPrice: beanOrItem.prices[size],
-        quantity: 1,
-        frequency: 'one_time',
-      };
-      setCartItems((prev) => [...prev, newItem]);
+      setCartItems((prev) =>
+        prev.map((item) => (item.id === itemId ? { ...item, quantity: newQty } : item))
+      );
+    }
+  };
+
+  const handleRemoveCartItem = (itemId: string) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const handleAddToCart = (beanOrItem: CoffeeBean | CartItem, grind: GrindType = 'Granos', size: BagSize = '250g') => {
+    if ('unitPrice' in beanOrItem) {
+      setCartItems((prev) => {
+        const existingIndex = prev.findIndex(
+          (item) => item.beanId === beanOrItem.beanId && item.grind === beanOrItem.grind && item.size === beanOrItem.size
+        );
+        if (existingIndex > -1) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: updated[existingIndex].quantity + (beanOrItem.quantity || 1),
+          };
+          return updated;
+        }
+        return [...prev, beanOrItem];
+      });
+    } else {
+      setCartItems((prev) => {
+        const existingIndex = prev.findIndex(
+          (item) => item.beanId === beanOrItem.id && item.grind === grind && item.size === size
+        );
+        if (existingIndex > -1) {
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: updated[existingIndex].quantity + 1,
+          };
+          return updated;
+        }
+        const newItem: CartItem = {
+          id: `cart-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          beanId: beanOrItem.id,
+          beanName: beanOrItem.name,
+          grind,
+          size,
+          unitPrice: beanOrItem.prices[size],
+          quantity: 1,
+          frequency: 'one_time',
+        };
+        return [...prev, newItem];
+      });
     }
     setIsCartOpen(true);
   };
 
   const handleDirectWhatsAppOrder = (bean: CoffeeBean, grind: GrindType, size: BagSize) => {
-    const singleItem: CartItem = {
-      id: `direct-${Date.now()}`,
+    const itemToAdd: CartItem = {
+      id: `cart-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       beanId: bean.id,
       beanName: bean.name,
       grind,
@@ -140,12 +180,43 @@ export function App() {
       quantity: 1,
       frequency: 'one_time',
     };
-    setDirectCheckoutItem(singleItem);
+
+    setCartItems((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.beanId === bean.id && item.grind === grind && item.size === size
+      );
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + 1,
+        };
+        return updated;
+      }
+      return [...prev, itemToAdd];
+    });
+
+    setDirectCheckoutItem(null);
     setIsCheckoutOpen(true);
   };
 
   const handleDirectCheckoutFromCustomizer = (item: CartItem) => {
-    setDirectCheckoutItem(item);
+    setCartItems((prev) => {
+      const existingIndex = prev.findIndex(
+        (i) => i.beanId === item.beanId && i.grind === item.grind && i.size === item.size
+      );
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + (item.quantity || 1),
+        };
+        return updated;
+      }
+      return [...prev, item];
+    });
+
+    setDirectCheckoutItem(null);
     setIsCheckoutOpen(true);
   };
 
@@ -153,14 +224,28 @@ export function App() {
     const packItem: CartItem = {
       id: `pack-magma-${Date.now()}`,
       beanId: 'pack-magma',
-      beanName: 'Pack Magma Degustación · 3 Estilos (3 x 250g en Granos)',
+      beanName: 'Pack Magma · Degustación 3 Orígenes (3x250g en Granos)',
       grind: 'Granos',
-      size: '250g',
+      size: '3 x 250g (750g)',
       unitPrice: 51300,
       quantity: 1,
       frequency: 'one_time',
     };
-    setDirectCheckoutItem(packItem);
+
+    setCartItems((prev) => {
+      const existingIndex = prev.findIndex((i) => i.beanId === 'pack-magma');
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + 1,
+        };
+        return updated;
+      }
+      return [...prev, packItem];
+    });
+
+    setDirectCheckoutItem(null);
     setIsCheckoutOpen(true);
   };
 
@@ -239,7 +324,16 @@ export function App() {
               onExploreClick={() => {
                 const catalogEl = document.getElementById('catalog');
                 if (catalogEl) {
-                  catalogEl.scrollIntoView({ behavior: 'smooth' });
+                  const headerEl = document.querySelector('header');
+                  const headerHeight = headerEl ? headerEl.getBoundingClientRect().height : 85;
+                  // Provide comfortable breathing room so the section badge and title are 100% visible
+                  const extraOffset = window.innerWidth < 640 ? 20 : 28;
+                  const elementPosition = catalogEl.getBoundingClientRect().top + window.scrollY;
+                  const targetPosition = elementPosition - headerHeight - extraOffset;
+                  window.scrollTo({
+                    top: Math.max(0, targetPosition),
+                    behavior: 'smooth',
+                  });
                 } else {
                   setActiveTab('catalog');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -338,6 +432,8 @@ export function App() {
         onOrderCreated={handleOrderCreated}
         directItem={directCheckoutItem}
         currentUserProfile={loyaltyProfile}
+        onUpdateQuantity={handleUpdateCartQuantity}
+        onRemoveItem={handleRemoveCartItem}
       />
 
       <OnboardingQuizModal

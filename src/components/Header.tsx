@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { LavaLogo } from './LavaLogo';
 import { RollingBanner } from './RollingBanner';
 import { CartItem, LoyaltyProfile } from '../types';
-import { ShoppingBag, Sparkles, Menu, X, Instagram } from 'lucide-react';
+import { ShoppingBag, Menu, X, Instagram } from 'lucide-react';
+import { CoffeeBeanIcon } from './CoffeeBeanIcon';
 
 interface HeaderProps {
   activeTab: 'home' | 'catalog' | 'club' | 'guides' | 'crm';
@@ -88,24 +89,24 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Right actions: Pedí tu café, Instagram & Cart Trigger */}
-          <div className="flex items-center justify-end flex-1 gap-2 sm:gap-3">
+          <div className="flex items-center justify-end flex-1 gap-1.5 sm:gap-2.5 md:gap-3">
             
-            {/* Pedí tu café Customizer Trigger */}
+            {/* Pedí tu café Customizer Trigger - Strict single-line on mobile */}
             <button
               onClick={onOpenCustomizer}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#d49a55]/40 bg-[#d49a55]/15 hover:bg-[#d49a55]/25 text-[#d49a55] hover:text-white transition-all cursor-pointer text-[11px] font-semibold"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full border border-[#d49a55]/40 bg-[#d49a55]/15 hover:bg-[#d49a55]/25 text-[#d49a55] hover:text-white transition-all cursor-pointer text-[11px] font-semibold whitespace-nowrap shrink-0"
               title="Personalizá y pedí tu café"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#d49a55]" />
-              <span>Pedí tu café</span>
+              <CoffeeBeanIcon className="w-3.5 h-3.5 text-[#d49a55] shrink-0" />
+              <span className="whitespace-nowrap">Pedí tu café</span>
             </button>
 
-            {/* Instagram Link - Between Pedí tu café and Cart */}
+            {/* Instagram Link - Visible on Desktop/Tablet, hidden on mobile (available in mobile menu) */}
             <a
               href="https://www.instagram.com/lavacafe.patagonia/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-full text-[#cfc5b8] hover:text-[#E1306C] transition-colors cursor-pointer hover:bg-white/5"
+              className="hidden sm:inline-flex p-2 rounded-full text-[#cfc5b8] hover:text-[#E1306C] transition-colors cursor-pointer hover:bg-white/5 shrink-0"
               title="Instagram: @lavacafe.patagonia"
               aria-label="Instagram"
             >
@@ -115,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Cart Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 rounded-full text-[#cfc5b8] hover:text-white transition-colors cursor-pointer hover:bg-white/5"
+              className="relative p-1.5 sm:p-2 rounded-full text-[#cfc5b8] hover:text-white transition-colors cursor-pointer hover:bg-white/5 shrink-0"
               aria-label="Ver carrito"
             >
               <ShoppingBag className="w-4.5 h-4.5 stroke-[1.5]" />
@@ -129,7 +130,8 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 text-[#a89d90] hover:text-white cursor-pointer"
+              className="md:hidden p-1 text-[#a89d90] hover:text-white cursor-pointer shrink-0"
+              aria-label="Abrir menú"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -167,7 +169,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="w-full py-2.5 px-4 rounded-xl bg-[#d49a55]/20 border border-[#d49a55]/50 text-[#d49a55] hover:bg-[#d49a55] hover:text-black text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-[#d49a55]" />
+              <CoffeeBeanIcon className="w-4 h-4 text-[#d49a55]" />
               <span>Pedí tu café</span>
             </button>
 
